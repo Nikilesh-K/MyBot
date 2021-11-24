@@ -17,7 +17,7 @@ GUILD = os.getenv('DISCORD_GUILD')
 client = commands.Bot(command_prefix="*", intents=intents)
 
 #Sqlite Connection Code
-dataConn = sqlite3.connect('C:\All Stuff\Programming\MyBot\RPGdata.db')
+dataConn = sqlite3.connect('C:\All Stuff\Programming\MyBot\SQLite Central DB\Central DB.db')
 cursor = dataConn.cursor()
 
 #Activation Indicator

@@ -1,0 +1,41 @@
+Schema reference for each data table stored in the Central DB
+
+RPG:
+
+Name: MONEY_DATA
+Purpose: Store amount of money for each user
+Schema:
+    - Column 1: ID (INT) - PRIMARY KEY
+    - Column 2: USERNAME (TEXT)
+    - Column 3: MONEY (INT)
+
+Name: ARMY_DATA
+Purpose: Store details of each user's Army
+Schema:
+    - Column 1: ID (INT) - PRIMARY KEY
+    - Column 2: USERNAME (TEXT)
+    - Column 3: SHIP_LEVEL (TEXT)
+    - Column 4: WEAPON_LEVEL (TEXT)
+
+Name: SHOP
+Purpose: Store available Army components and their respective stats
+Schema:
+    - Column 1: ID (INT) - PRIMARY KEY
+    - Column 2: NAME (TEXT)
+    - Column 3: TYPE (TEXT)
+    - Column 4: COST (INT)
+    - Column 5: SHIP_HEALTH (INT)
+    - Column 6: WEAPON_DAMAGE (INT)
+
+
+Music Player:
+
+Name: PLAYCACHE
+Purpose: Store cached songs and their respective URLs
+Schema:
+    - Column 1: USERNAME (STRING)
+    - Column 2: SONGNAME (STRING)
+    - Column 3: URL (STRING)
+
+
+Total Tables: 4
