@@ -52,23 +52,41 @@ async def on_guild_join():
     await ctx.channel.send("Initalized Army Database!")
 
 
+#RPG COMMAND SUPPORT: Used in User Commands
 
+#Write to a Table in the DB
+#WIP
+def writeDB(tableName, targetColumn, conditionColumn, targetData, conditionData):
+    cursor.execute("UPDATE {tableName} SET {targetColumn} = {targetData} WHERE {conditionColumn} = {conditionData};".format(tableName = tableName,
+                                                                                                                            targetColumn = targetColumn,
+                                                                                                                            targetData = targetData,
+                                                                                                                            conditionColumn = conditionColumn,
+                                                                                                                            conditionData = conditionData))
+    dataConn.commit()
+#Retrieve all data from a Table
+#WIP
+def retrieveTable(tableName):
+    tableData = cursor.execute("SELECT * FROM {table};".format(table = tableName))
+    return tableData
+#Retrieve data for a specified target (eg. user)
+#WIP
+def RetrieveDataFromTarget(rpgData, targetIndex, target, requestedIndex):
+    for row in rpgData:
+        if row[targetIndex] == target:
+            return row[requestedIndex]
 
 #RPG USER COMMANDS: Used to run RPG operations by user
 
 #Work, increase Money balance by random amount
+#WIP
 @client.command()
 async def work(ctx):
     money = randint(0, 5000)
     await ctx.channel.send("You worked! You have earned: ***$" + str(money) + "!***")
-    data = cursor.execute("SELECT * FROM DATA;")
-    for row in data:
-        if row[1] == ctx.author.name:
-            previousMoney = row[2]
-            currentMoney = previousMoney + money
-            cursor.execute("UPDATE DATA SET MONEY = ? WHERE USERNAME = ?", (currentMoney, ctx.author.name,))
-            dataConn.commit()
-            break
+    data = retrieveTable("MONEY_DATA")
+    previousMoney = RetrieveDataFromTarget(data, 1, ctx.author.name, 2)        
+    currentMoney = previousMoney + money
+    writeDB("MONEY_DATA", "MONEY", "USERNAME", currentMoney, ctx.author.name)
 
 #Check Balance
 @client.command()
