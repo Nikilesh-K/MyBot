@@ -66,7 +66,6 @@ def retrieveTable(tableName):
     tableData = cursor.execute("SELECT * FROM {table};".format(table = tableName))
     return tableData
 #Retrieve data for a specified target (eg. user)
-#WIP
 def RetrieveDataFromTarget(rpgData, targetIndex, target, requestedIndex):
     for row in rpgData:
         if row[targetIndex] == target:
@@ -75,7 +74,6 @@ def RetrieveDataFromTarget(rpgData, targetIndex, target, requestedIndex):
 #RPG USER COMMANDS: Used to run RPG operations by user
 
 #Work, increase Money balance by random amount
-#WIP
 @client.command()
 async def work(ctx):
     money = randint(0, 5000)
@@ -88,17 +86,14 @@ async def work(ctx):
 #Check Balance
 @client.command()
 async def checkbal(ctx):
-    data = cursor.execute("SELECT * FROM DATA;")
-    for row in data:
-        if row[1] == ctx.author.name:
-            moneyStr = str(row[2])
-            await ctx.channel.send("Money: $" + moneyStr)
-            break
+    data = retrieveTable("MONEY_DATA")
+    money = RetrieveDataFromTarget(data, 1, ctx.author.name, 2)
+    await ctx.channel.send("Your current balance is: **" + str(money) + "**")
 
 #Check Server Balance
 @client.command()
 async def serverbal(ctx):
-    data = cursor.execute("SELECT * FROM DATA;")
+    data = retrieveTable("MONEY_DATA")
     embed = discord.Embed(
         title="Total Server Balances",
         color=discord.Color.red())
@@ -111,7 +106,7 @@ async def serverbal(ctx):
 #Check Shop
 @client.command()
 async def checkshop(ctx):
-    data = cursor.execute("SELECT * FROM SHOP;")
+    data = retrieveTable("SHOP")
     embed = discord.Embed(
         title="Welcome to the Shop!",
         description="Check out these awesome items!",
@@ -122,25 +117,32 @@ async def checkshop(ctx):
         cost = row[3]
         if itemType == "Weapon Level":
             weaponDamage = row[5]
-            embed.add_field(name=name + " ($" + str(cost) + ")", value="Type: " + itemType + ", Damage: " + str(weaponDamage), inline=False)
+            title = "{name} (${cost})"
+            "Type: " + itemType + ", Damage: " + str(weaponDamage)
+            embed.add_field(name="{name} (${cost})".format(name=name, cost=str(cost)), value= "Type: {itemType}, Damage: {damage}".format(itemType=itemType, damage=str(weaponDamage)), inline=False)
         else:
             shipHealth = row[4]
-            embed.add_field(name=name + " ($" + str(cost) + ")", value="Type: " + itemType + ", Health: " + str(shipHealth), inline=False)
+            embed.add_field(name="{name} (${cost})".format(name=name, cost=str(cost)), value="Type: {itemType}, Health: {health}".format(itemType=itemType, health=str(shipHealth)), inline=False)
     await ctx.channel.send(embed=embed)
 
 #Buy, decrease Money balance
 @client.command()
 async def buy(ctx, item):
     #Retrieve cost, type of item
-    shopData = cursor.execute("SELECT * FROM SHOP;")
+    shopData = retrieveTable("SHOP")
     for row in shopData:
+        cost = RetrieveDataFromTarget(shopData, 1, item, 3)
+        itemType = RetrieveDataFromTarget(shopData, 1, item, 2)
+
+        '''
         if row[1] == item:
             cost = row[3]
             itemType = row[2]
             break
+        '''
 
     #Subtract cost from user's funds, update database
-    userData = cursor.execute("SELECT * FROM DATA;")
+    userData = cursor.execute("SELECT * FROM MONEY_DATA;")
     for row in userData:
         if row[1] == ctx.author.name:
             currentMoney = row[2] - cost
