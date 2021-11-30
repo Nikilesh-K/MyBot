@@ -57,11 +57,8 @@ async def on_guild_join():
 #Write to a Table in the DB
 #WIP
 def writeDB(tableName, targetColumn, conditionColumn, targetData, conditionData):
-    cursor.execute("UPDATE {tableName} SET {targetColumn} = {targetData} WHERE {conditionColumn} = {conditionData};".format(tableName = tableName,
-                                                                                                                            targetColumn = targetColumn,
-                                                                                                                            targetData = targetData,
-                                                                                                                            conditionColumn = conditionColumn,
-                                                                                                                            conditionData = conditionData))
+    command = "UPDATE {tableName} SET {targetColumn} = {targetData} WHERE {conditionColumn} = {conditionData};"
+    cursor.execute(command.format(tableName = tableName, targetColumn = targetColumn, targetData = targetData, conditionColumn = conditionColumn, conditionData = "'" + conditionData + "'"))
     dataConn.commit()
 #Retrieve all data from a Table
 #WIP
