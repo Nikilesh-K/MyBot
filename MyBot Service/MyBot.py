@@ -117,8 +117,6 @@ async def checkshop(ctx):
         cost = row[3]
         if itemType == "Weapon Level":
             weaponDamage = row[5]
-            title = "{name} (${cost})"
-            "Type: " + itemType + ", Damage: " + str(weaponDamage)
             embed.add_field(name="{name} (${cost})".format(name=name, cost=str(cost)), value= "Type: {itemType}, Damage: {damage}".format(itemType=itemType, damage=str(weaponDamage)), inline=False)
         else:
             shipHealth = row[4]
@@ -126,13 +124,13 @@ async def checkshop(ctx):
     await ctx.channel.send(embed=embed)
 
 #Buy, decrease Money balance
+#WIP
 @client.command()
 async def buy(ctx, item):
     #Retrieve cost, type of item
     shopData = retrieveTable("SHOP")
-    for row in shopData:
-        cost = RetrieveDataFromTarget(shopData, 1, item, 3)
-        itemType = RetrieveDataFromTarget(shopData, 1, item, 2)
+    cost = RetrieveDataFromTarget(shopData, 1, item, 3)
+    itemType = RetrieveDataFromTarget(shopData, 1, item, 2)
 
         '''
         if row[1] == item:
@@ -142,7 +140,12 @@ async def buy(ctx, item):
         '''
 
     #Subtract cost from user's funds, update database
-    userData = cursor.execute("SELECT * FROM MONEY_DATA;")
+    moneyData = retrieveTable("MONEY_DATA")
+    currentMoney = RetrieveDataFromTarget(moneyData, 1, ctx.author.name, 2)
+    currentMoney -= cost
+    writeDB("MONEY_DATA", "MONEY", "USERNAME", currentMoney, ctx.author.name)
+    await ctx.channel.send("Bought **{item}** for ***{cost}***.".format(item=item, cost=cost))
+    '''
     for row in userData:
         if row[1] == ctx.author.name:
             currentMoney = row[2] - cost
@@ -150,6 +153,7 @@ async def buy(ctx, item):
             dataConn.commit()
             await ctx.channel.send("Bought **" + item + "** for ***" + str(cost) + "***.")
             break
+    '''
 
     #Update Army database with item level info
     armyData = cursor.execute("SELECT * FROM ARMY_DATA;")

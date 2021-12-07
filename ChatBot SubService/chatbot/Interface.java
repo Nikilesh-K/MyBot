@@ -1,6 +1,7 @@
 import java.sql.*;
 import java.util.concurrent.TimeUnit;
 
+/*
 public class Interface {
     public boolean runStatus = true;
     public Connection connect(){
@@ -24,12 +25,6 @@ public class Interface {
             ResultSet rs = statement.executeQuery(command)){
             while(rs.next()){
                 ticket = rs.getString("TICKET");
-                /*
-                System.out.println(rs.getInt("ID") + "\t"
-                        + rs.getString("TICKET") + "\t"
-                        + rs.getString("RESPONSE") + "\t");
-
-                 */
 
 
             }
@@ -60,8 +55,8 @@ public class Interface {
         //Initialize Objects
         Interface IF = new Interface();
         CStarter cstarter = new CStarter();
-        Progressor progressor = new Progressor();
-        Terminator terminator = new Terminator();
+        chatbot.Progressor progressor = new chatbot.Progressor();
+        chatbot.Terminator terminator = new chatbot.Terminator();
         //TESTING ZONE
         //System.out.println(cstarter.choosePhrase());
         IF.connect();
@@ -91,3 +86,4 @@ public class Interface {
 
 
 }
+*/
