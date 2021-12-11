@@ -73,8 +73,21 @@ public class Progressor {
 
     }
 
-    private void moviesHandler(){
-
+    private void moviesHandler(String phrase){
+        String[] operatives = {"I", "liked", "loved", "watched", "watching"};
+        String[] phraseArray = phrase.split("\\s");
+        for(int i = 0; i < phraseArray.length; i++){
+            for(int j = 0; j < operatives.length; j++){
+                if(Arrays.asList(operatives).contains(phraseArray[j])){
+                   break;
+                }
+                if(j == operatives.length - 1){
+                    for(String element : phraseArray){
+                        movies.add(element);
+                    }
+                }
+            }
+        }
     }
 
     public void process(Topic topic, String phrase){
@@ -86,7 +99,7 @@ public class Progressor {
                 moodHandler(phrase);
                 break;
             case MOVIES:
-                moviesHandler();
+                moviesHandler(phrase);
                 break;
         }
     }
