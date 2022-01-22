@@ -79,6 +79,8 @@ async def deletechannel(ctx, name):
 
 
 #ROLE MANAGEMENT:
+
+#Create a role
 @client.command()
 async def createrole(ctx, roleName):
     if ctx.author.guild_permissions.administrator == True:
@@ -94,16 +96,15 @@ async def deleterole(ctx, roleName):
                 await ctx.channel.send("Deleted role!")
                 await role.delete()
 #Edit a role
+#WIP
 @client.command()
-async def editrole(ctx, roleName, **perms):
+async def editrole(ctx, roleName, **kwargs):
     if ctx.author.guild_permissions.administrator == True:
-        permission = discord.Permissions()
+        perms = discord.Permissions()
+        perms.update(kwargs)
         for role in ctx.guild.roles:
             if role.name == roleName:
-                permsList = list(perms)
-                for i in range(len(permsList) - 1):
-                    permission.update(permsList[i]=permsList[i+1])
-                await role.edit(permission)
+                await role.edit(perms)
 
 #PUNISHMENT MANAGEMENT:
 

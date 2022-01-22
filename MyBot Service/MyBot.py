@@ -55,16 +55,23 @@ async def on_guild_join():
 #RPG COMMAND SUPPORT: Used in User Commands
 
 #Write to a Table in the DB
-#WIP
 def writeDB(tableName, targetColumn, conditionColumn, targetData, conditionData):
     command = "UPDATE {tableName} SET {targetColumn} = {targetData} WHERE {conditionColumn} = {conditionData};"
-    cursor.execute(command.format(tableName = tableName, targetColumn = targetColumn, targetData = targetData, conditionColumn = conditionColumn, conditionData = "'" + conditionData + "'"))
+    
+    #Check data parameters - add quotes if str
+    if isinstance(targetData, str):
+        targetData = "'" + targetData + "'"
+    if isinstance(conditionData, str):
+        conditionData = "'" + conditionData + "'"
+        
+    cursor.execute(command.format(tableName = tableName, targetColumn = targetColumn, targetData = targetData, conditionColumn = conditionColumn, conditionData = conditionData))
     dataConn.commit()
+    
 #Retrieve all data from a Table
-#WIP
 def retrieveTable(tableName):
     tableData = cursor.execute("SELECT * FROM {table};".format(table = tableName))
     return tableData
+
 #Retrieve data for a specified target (eg. user)
 def RetrieveDataFromTarget(rpgData, targetIndex, target, requestedIndex):
     for row in rpgData:
@@ -124,20 +131,13 @@ async def checkshop(ctx):
     await ctx.channel.send(embed=embed)
 
 #Buy, decrease Money balance
-#WIP
 @client.command()
 async def buy(ctx, item):
     #Retrieve cost, type of item
     shopData = retrieveTable("SHOP")
-    cost = RetrieveDataFromTarget(shopData, 1, item, 3)
     itemType = RetrieveDataFromTarget(shopData, 1, item, 2)
-
-        '''
-        if row[1] == item:
-            cost = row[3]
-            itemType = row[2]
-            break
-        '''
+    shopData = retrieveTable("SHOP")
+    cost = RetrieveDataFromTarget(shopData, 1, item, 3)
 
     #Subtract cost from user's funds, update database
     moneyData = retrieveTable("MONEY_DATA")
@@ -145,27 +145,13 @@ async def buy(ctx, item):
     currentMoney -= cost
     writeDB("MONEY_DATA", "MONEY", "USERNAME", currentMoney, ctx.author.name)
     await ctx.channel.send("Bought **{item}** for ***{cost}***.".format(item=item, cost=cost))
-    '''
-    for row in userData:
-        if row[1] == ctx.author.name:
-            currentMoney = row[2] - cost
-            cursor.execute("UPDATE DATA SET MONEY = ? WHERE USERNAME = ?", (currentMoney, ctx.author.name,))
-            dataConn.commit()
-            await ctx.channel.send("Bought **" + item + "** for ***" + str(cost) + "***.")
-            break
-    '''
 
     #Update Army database with item level info
-    armyData = cursor.execute("SELECT * FROM ARMY_DATA;")
-    for row in armyData:
-        if row[1] == ctx.author.name:
-            if itemType == "Weapon Level":
-                cursor.execute("UPDATE ARMY_DATA SET WEAPON_LEVEL = ? WHERE USERNAME = ?", (item, ctx.author.name,))
-            else:
-                cursor.execute("UPDATE ARMY_DATA SET SHIP_LEVEL = ? WHERE USERNAME = ?", (item, ctx.author.name,))
-            dataConn.commit()
-            await ctx.channel.send("Sucessfully updated all databases!")
-            break
+    armyData = retrieveTable("ARMY_DATA")
+    if itemType == "Weapon Level":
+        writeDB("ARMY_DATA", "WEAPON_LEVEL", "USERNAME", item, ctx.author.name)
+    else:
+        writeDB("ARMY_DATA", "SHIP_LEVEL", "USERNAME", item, ctx.author.name)
 
 #Check army
 @client.command()

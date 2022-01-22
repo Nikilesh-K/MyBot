@@ -113,5 +113,15 @@ async def cacheplay(ctx, name, loop):
             url = row[1]
             await playtube(ctx, row[1], loop)
             break
-    
+
+#Display songs in Cache
+@client.command()
+async def displaycache(ctx):
+    cacheSongs = cursor.execute('SELECT SONGNAME, URL FROM PLAYCACHE WHERE USERNAME = ?', (ctx.author.name,))
+    embed = discord.Embed(
+        title="Cache for: " + ctx.author.name,
+        color=discord.Color.red())
+    for row in cacheSongs:
+        embed.add_field(name="Song name: {name}".format(name=row[0]), value="URL: {url}".format(url=row[1]), inline=False)
+    await ctx.channel.send(embed=embed)
 client.run(TOKEN)
