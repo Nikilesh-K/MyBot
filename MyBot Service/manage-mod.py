@@ -95,16 +95,6 @@ async def deleterole(ctx, roleName):
             if role.name == roleName:
                 await ctx.channel.send("Deleted role!")
                 await role.delete()
-#Edit a role
-#WIP
-@client.command()
-async def editrole(ctx, roleName, **kwargs):
-    if ctx.author.guild_permissions.administrator == True:
-        perms = discord.Permissions()
-        perms.update(kwargs)
-        for role in ctx.guild.roles:
-            if role.name == roleName:
-                await role.edit(perms)
 
 #PUNISHMENT MANAGEMENT:
 
