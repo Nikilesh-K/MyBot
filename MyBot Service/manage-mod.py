@@ -21,6 +21,7 @@ async def on_ready():
         if guild.name == GUILD:
             break
     print("Process manage-mod active")
+
 #CHANNEL MANAGEMENT:
 
 #Creates one Text Channel
@@ -76,7 +77,6 @@ async def deletechannel(ctx, name):
                 break
     else:
         await ctx.channel.send("Sorry, you do not have the proper permissions.")
-
 
 #ROLE MANAGEMENT:
 
