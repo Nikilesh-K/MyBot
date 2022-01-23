@@ -37,20 +37,23 @@ async def on_guild_join():
     #Initalize RPG Table
     i = 1
     for member in ctx.guild.members:
+        if member.bot:
+            continue
         memberName = member.name
-        cursor.execute("INSERT INTO DATA VALUES (?, ?, ?);", (i, memberName, 0))
+        cursor.execute("INSERT INTO MONEY_DATA VALUES (?, ?, ?);", (i, memberName, 0))
         i += 1
     dataConn.commit()
-    await ctx.channel.send("Successfully initalized RPG!")
+    await ctx.channel.send("Initalized RPG!")
 
     #Initalize Army Table
     i = 1
     for member in ctx.guild.members:
+        if member.bot:
+            continue
         cursor.execute("INSERT INTO ARMY_DATA (ID, USERNAME) VALUES (?, ?)", (i, member.name,))
         i += 1
     dataConn.commit()
     await ctx.channel.send("Initalized Army Database!")
-
 
 #RPG COMMAND SUPPORT: Used in User Commands
 
@@ -92,10 +95,17 @@ async def work(ctx):
 
 #Check Balance
 @client.command()
-async def checkbal(ctx):
+async def checkbal(ctx, member):
     data = retrieveTable("MONEY_DATA")
-    money = RetrieveDataFromTarget(data, 1, ctx.author.name, 2)
-    await ctx.channel.send("Your current balance is: **" + str(money) + "**")
+    if member == "me":
+        money = RetrieveDataFromTarget(data, 1, ctx.author.name, 2)
+        await ctx.channel.send("Your current balance is: **" + str(money) + "**")
+    else:
+        money = RetrieveDataFromTarget(data, 1, member, 2)
+        if money == None:
+            await ctx.channel.send("Sorry, that member doesn't exist.")
+        else:
+            await ctx.channel.send(member + "'s current balance is: **" + str(money) + "**")
 
 #Check Server Balance
 @client.command()
@@ -333,34 +343,31 @@ async def delete(ctx, name):
 
     else:
         await ctx.channel.send("Sorry, you do not have the proper permissions.")
-'''
-Temporarily commented out due to on_guild_join() event
 
-#Initalize Army Table (WIP)
+#Initialize Data Tables if not done so already
+#Exact copy of on_guild_join()
 @client.command()
-async def initarmydata(ctx):
-    if ctx.author.guild_permissions.administrator == True:
-        i = 1
-        for member in ctx.guild.members:
-            cursor.execute("INSERT INTO ARMY_DATA (ID, USERNAME) VALUES (?, ?)", (i, member.name,))
-            i += 1
-        dataConn.commit()
-        await ctx.channel.send("Initalized Army Database!")
-
-    else:
-        await ctx.channel.send("Sorry, you do not have the proper permissions.")
-
-#Initalize RPG Table (WIP)
-@client.command()
-async def initrpg(ctx):
+async def init(ctx):
+    #Initalize RPG Table
     i = 1
     for member in ctx.guild.members:
+        if member.bot:
+            continue
         memberName = member.name
-        cursor.execute("INSERT INTO DATA VALUES (?, ?, ?);", (i, memberName, 0))
+        cursor.execute("INSERT INTO MONEY_DATA VALUES (?, ?, ?);", (i, memberName, 0))
         i += 1
     dataConn.commit()
-    await ctx.channel.send("Successfully initalized RPG!")
-'''
+
+    #Initalize Army Table
+    i = 1
+    for member in ctx.guild.members:
+        if member.bot:
+            continue
+        cursor.execute("INSERT INTO ARMY_DATA (ID, USERNAME) VALUES (?, ?)", (i, member.name,))
+        i += 1
+    dataConn.commit()
+    await ctx.channel.send("Initalized Database!")
+
 client.run(TOKEN)
 
 
