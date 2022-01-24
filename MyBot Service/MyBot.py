@@ -31,7 +31,6 @@ async def on_ready():
     
 #This event is called whenever MyBot joins a new guild
 #Initalizes all Data Tables upon joining
-#WIP
 @client.event
 async def on_guild_join():
     #Initalize RPG Table
@@ -368,6 +367,12 @@ async def init(ctx):
     dataConn.commit()
     await ctx.channel.send("Initalized Database!")
 
+#OVERALL: Help command for detailed documentation for all commands
+#Redirects to a webpage
+@client.command()
+async def help(ctx):
+    helpPageUrl = ""
+    await ctx.channel.send("Click on this link for help: " + helpPageUrl)
 client.run(TOKEN)
 
 

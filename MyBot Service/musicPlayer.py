@@ -6,11 +6,13 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from random import randint
 from youtube_dl import YoutubeDL
+from requests import get
 import asyncio
 
 intents = discord.Intents.default()
 intents.members = True
 
+#Load Environment Variables
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
@@ -35,20 +37,31 @@ async def connect(ctx):
     vc = client.get_channel(849078196355989524)
     voiceClient = await vc.connect()
 
-#Music Bot TOOLS - Support functions
-def play(vClient, mpeg_ops, ydl_ops, reqUrl):
+#Music Bot TOOLS - Support functions for commands
+
+#Download a video from Youtube from user query, play video, return video metadata
+def play(vClient, mpeg_ops, ydl_ops, query):
     with YoutubeDL(ydl_ops) as ydl:
-        info = ydl.extract_info(reqUrl, download=False)
-    URL = info['url']
+        #Check if URL
+        try:
+            get(query)
+        #If not URL
+        except:
+            info = ydl.extract_info(f"ytsearch:{query}", download=False)['entries'][0]
+        #If is URL
+        else:
+            info = ydl.extract_info(query, download=False)
+    URL = info['formats'][0]['url']
     PCMObj = discord.FFmpegPCMAudio(executable="C:/ffmpeg/ffmpeg-4.4-full_build/ffmpeg-4.4-full_build/bin/ffmpeg.exe", source=URL, before_options=mpeg_ops)
     vClient.play(PCMObj)
     return info
-            
     
 
 #Music Bot COMMANDS - Used by users to control operations
+
+#Play a song from Youtube, loop if needed - calls play()
 @client.command()
-async def playtube(ctx, url, loopChoice):
+async def playtube(ctx, query, loopChoice):
     YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
     FFMPEG_OPTIONS = {
         'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
@@ -58,70 +71,44 @@ async def playtube(ctx, url, loopChoice):
 
     if loopChoice == "loopOn":
         if not voiceClient.is_playing():
-            urlInfo = play(voiceClient, FFMPEG_OPTIONS, YDL_OPTIONS, url)
-            await ctx.channel.send("Joined VC, playing requested music.")
+            urlInfo = play(voiceClient, FFMPEG_OPTIONS, YDL_OPTIONS, query)
+            await ctx.channel.send("Joined VC, playing: " + urlInfo['webpage_url'])
             while True:
                 await asyncio.sleep(urlInfo['duration'])
                 await asyncio.sleep(2)
-                play(voiceClient, FFMPEG_OPTIONS, YDL_OPTIONS, url)
+                play(voiceClient, FFMPEG_OPTIONS, YDL_OPTIONS, query)
 
     else:
         if not voiceClient.is_playing():
-            play(voiceClient, FFMPEG_OPTIONS, YDL_OPTIONS, url)
-            voiceClient.is_playing()
-            await ctx.channel.send("Joined VC, playing requested music")
-            
+            urlInfo = play(voiceClient, FFMPEG_OPTIONS, YDL_OPTIONS, query)
+            await ctx.channel.send("Joined VC, playing: " + urlInfo['webpage_url'])
+
+#Pause player            
 @client.command()
 async def pause(ctx):
     voiceClient = client.voice_clients[0]
     voiceClient.pause()
     await ctx.channel.send("Paused!")
 
+#Resume player
 @client.command()
 async def resume(ctx):
     voiceClient = client.voice_clients[0]
     voiceClient.resume()
     await ctx.channel.send("Resumed!")
 
+#Stop player
 @client.command()
 async def stop(ctx):
     voiceClient = client.voice_clients[0]
     voiceClient.stop()
     await ctx.channel.send("Stopped playing!")
 
+#Disconnect player
 @client.command()
 async def dc(ctx):
     voiceClient = client.voice_clients[0]
     await voiceClient.disconnect()
     await ctx.channel.send("Disconnected!")
 
-#Caching Commands
-
-#Save song to Cache
-@client.command()
-async def save(ctx, name, url):
-    cursor.execute('INSERT INTO PLAYCACHE VALUES (?, ?, ?);', (ctx.author.name, name, url,))
-    dataConn.commit()
-
-#Play song from Cache
-@client.command()
-async def cacheplay(ctx, name, loop):
-    #Returns all songs cached for user
-    cacheSongs = cursor.execute('SELECT SONGNAME, URL FROM PLAYCACHE WHERE USERNAME = ?', (ctx.author.name,))
-    for row in cacheSongs:
-        if row[0] == name:
-            url = row[1]
-            await playtube(ctx, row[1], loop)
-            break
-
-#Display songs in Cache
-@client.command()
-async def displaycache(ctx):
-    cacheSongs = cursor.execute('SELECT SONGNAME, URL FROM PLAYCACHE WHERE USERNAME = ?', (ctx.author.name,))
-    embed = discord.Embed(
-        title="Cache for: " + ctx.author.name,
-        color=discord.Color.red())
-    for row in cacheSongs:
-        embed.add_field(name="Song name: {name}".format(name=row[0]), value="URL: {url}".format(url=row[1]), inline=False)
-    await ctx.channel.send(embed=embed)
 client.run(TOKEN)
