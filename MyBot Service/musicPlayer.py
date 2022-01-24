@@ -66,7 +66,11 @@ async def playtube(ctx, query, loopChoice):
     FFMPEG_OPTIONS = {
         'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 
-    vc = client.get_channel(902016508908150824)
+    voice_state = ctx.author.voice
+    if voice_state == None:
+        await ctx.channel.send("Please connect to a voice channel first.")
+        return
+    vc = voice_state.channel
     voiceClient = await vc.connect()
 
     if loopChoice == "loopOn":
