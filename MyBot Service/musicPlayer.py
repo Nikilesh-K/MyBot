@@ -42,15 +42,7 @@ async def connect(ctx):
 #Download a video from Youtube from user query, play video, return video metadata
 def play(vClient, mpeg_ops, ydl_ops, query):
     with YoutubeDL(ydl_ops) as ydl:
-        #Check if URL
-        try:
-            get(query)
-        #If not URL
-        except:
-            info = ydl.extract_info(f"ytsearch:{query}", download=False)['entries'][0]
-        #If is URL
-        else:
-            info = ydl.extract_info(query, download=False)
+        info = ydl.extract_info(f"ytsearch:{query}", download=False)['entries'][0]
     URL = info['formats'][0]['url']
     PCMObj = discord.FFmpegPCMAudio(executable="C:/ffmpeg/ffmpeg-4.4-full_build/ffmpeg-4.4-full_build/bin/ffmpeg.exe", source=URL, before_options=mpeg_ops)
     vClient.play(PCMObj)
@@ -62,9 +54,9 @@ def play(vClient, mpeg_ops, ydl_ops, query):
 #Play a song from Youtube, loop if needed - calls play()
 @client.command()
 async def playtube(ctx, query, loopChoice):
-    YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
+    YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True', 'continue': 'True'}
     FFMPEG_OPTIONS = {
-        'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+        'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 50', 'options': '-vn'}
 
     voice_state = ctx.author.voice
     if voice_state == None:
@@ -80,6 +72,8 @@ async def playtube(ctx, query, loopChoice):
             while True:
                 await asyncio.sleep(urlInfo['duration'])
                 await asyncio.sleep(2)
+                if voiceClient.is_paused():
+                    continue
                 play(voiceClient, FFMPEG_OPTIONS, YDL_OPTIONS, query)
 
     else:
