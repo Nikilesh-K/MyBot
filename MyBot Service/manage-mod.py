@@ -96,6 +96,25 @@ async def deleterole(ctx, roleName):
                 await ctx.channel.send("Deleted role!")
                 await role.delete()
 
+#Edit a role
+@client.command()
+async def editrole(ctx, role, perms):
+    permDict = {}
+    permList = perms.split('-')
+    for perm in permList:
+        permCat = perm.split(':')[0] #can be simplified
+        permValue = perm.split(':')[1]
+        permDict[permCat] = permValue
+  
+    permsObj = Permissions()
+    permsObj.update(**permDict)
+  
+    for role in guild.roles:
+        if role.name == role:
+            await role.edit(permissions=permsObj)
+            await ctx.channel.send("Edited role!")
+            break
+
 #PUNISHMENT MANAGEMENT:
 
 #Ban
@@ -112,7 +131,5 @@ async def kick(ctx, memberName):
         for member in ctx.guild.members:
             if member.name == memberName or member.nick == memberName:
                 await member.kick()
-
-
-
+                
 client.run(TOKEN)
