@@ -102,7 +102,7 @@ async def editrole(ctx, roleName, perms):
     permDict = {}
     permList = perms.split('-')
     for perm in permList:
-        permCat = perm.split(': ')[0] #can be simplified
+        permCat = perm.split(': ')[0]
         permValue = perm.split(': ')[1]
         if permValue == "True" or permValue == "true":
             permValue = True
