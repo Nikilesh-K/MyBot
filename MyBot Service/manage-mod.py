@@ -98,22 +98,27 @@ async def deleterole(ctx, roleName):
 
 #Edit a role
 @client.command()
-async def editrole(ctx, role, perms):
+async def editrole(ctx, roleName, perms):
     permDict = {}
     permList = perms.split('-')
     for perm in permList:
-        permCat = perm.split(':')[0] #can be simplified
-        permValue = perm.split(':')[1]
+        permCat = perm.split(': ')[0] #can be simplified
+        permValue = perm.split(': ')[1]
+        if permValue == "True" or permValue == "true":
+            permValue = True
+        else:
+            permValue = False
         permDict[permCat] = permValue
   
-    permsObj = Permissions()
+    permsObj = discord.Permissions()
     permsObj.update(**permDict)
-  
-    for role in guild.roles:
-        if role.name == role:
-            await role.edit(permissions=permsObj)
+
+    for role in ctx.guild.roles:
+        if role.name == roleName:
             await ctx.channel.send("Edited role!")
-            break
+            await role.edit(permissions=permsObj)
+            return
+    await ctx.channel.send("Couldn't find role.")
 
 #PUNISHMENT MANAGEMENT:
 
