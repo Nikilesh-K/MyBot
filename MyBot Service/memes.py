@@ -44,10 +44,7 @@ async def meme(ctx):
 
     posts = requests.get("https://oauth.reddit.com/r/memes/hot", headers=headers)
     postData = posts.json()
-    for post in postData['data']['children']:
-        await ctx.channel.send(post['data']['title'])
-                        
+    post = postData['data']['children'][randint(0, postData.length)]
+    await ctx.channel.send(post['data']['title'])
     
-
-
 client.run(TOKEN)
