@@ -27,15 +27,21 @@ Schema:
     - Column 5: SHIP_HEALTH (INT)
     - Column 6: WEAPON_DAMAGE (INT)
 
+SubServices:
 
-Music Player:
-
-Name: PLAYCACHE
-Purpose: Store cached songs and their respective URLs
+Name: CALCULATOR
+Purpose: Provide communication between Calculator SubService and MyBot Service
 Schema:
-    - Column 1: USERNAME (STRING)
-    - Column 2: SONGNAME (STRING)
-    - Column 3: URL (STRING)
+    - Column 1: ID (INT) - PRIMARY KEY
+    - Column 2: USERNAME (STRING)
+    - Column 3: TICKET (STRING)
+    - Column 4: RESPONSE (STRING)
 
+Name: CHATBOT
+Purpose: Provide communication between ChatBot SubService and MyBot Service
+    - Column 1: ID (INT) - PRIMARY KEY
+    - Column 2: USERNAME (STRING)
+    - Column 3: TICKET (STRING)
+    - Column 4: RESPONSE (STRING)
 
-Total Tables: 4
+Total Tables: 5

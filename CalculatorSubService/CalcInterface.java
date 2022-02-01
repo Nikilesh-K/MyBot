@@ -1,7 +1,9 @@
 import java.sql.*;
 import java.util.concurrent.TimeUnit;
-public class Interface extends TempCalc {
+import java.util.ArrayList;
+public class Interface{
     public boolean runStatus = true;
+
     public Connection connect(){
         //Connect to DB
         Connection conn = null;
@@ -15,7 +17,7 @@ public class Interface extends TempCalc {
         return conn;
     }
 
-    public String read(){
+    private String read(){
         String ticket = null;
         String command = "SELECT * FROM CALCULATOR";
         try(Connection conn = this.connect();
@@ -47,7 +49,6 @@ public class Interface extends TempCalc {
             PreparedStatement PS = conn.prepareStatement(command)){
             PS.setString(1, response);
             PS.setInt(2, id);
-
             PS.executeUpdate();
 
         } catch(SQLException e){
@@ -55,35 +56,67 @@ public class Interface extends TempCalc {
         }
     }
 
+    public String listen(){
+        while(true){
+            String ticket = this.read();
+            if(ticket != null){
+                return ticket;
+            }
+        }
+    }
+
     public static void main(String[] args) throws InterruptedException{
         Interface IF = new Interface();
+        TempCalc tempCalc = new TempCalc();
+        ScientificCalc scientificCalc = new ScientificCalc();
+
         IF.connect();
-        while(IF.runStatus){
-            String ticket = IF.read();
-            if(ticket.equals("TEST TICKET")){
-                IF.update(1, "TEST ACK");
-                Thread.sleep(5000);
-            }
+        Thread thread = new Thread(IF);
+        thread.start();
 
-            if(ticket.startsWith("TEMPCALC F-C")){
-                String param = ticket.substring(13, ticket.length() );
-                int output = IF.FtoC(Integer.parseInt(param));
-                IF.update(1, Integer.toString(output));
-                Thread.sleep(5000);
-            }
+        while(runStatus){
+            //Listen for ticket
+            String ticket = listen();
+            
+            //Check ticket content
+            if(ticket.contains("TEMPCALC")){
+                //Get mode, input temp
+                String mode = ticket.substring(9, 12);
+                int inputTemp = Integer.parseInt(ticket.substring(13));
 
-            if(ticket.startsWith("TEMPCALC C-F")){
-                String param = ticket.substring(13, ticket.length() );
-                int output = IF.CtoF(Integer.parseInt(param));
-                IF.update(1, Integer.toString(output));
-                Thread.sleep(5000);
-            }
+                //Check mode, do calculation, update central DB
+                switch(mode){
+                    case "C-F":
+                        int fahren = tempCalc.CtoF(inputTemp);
+                        IF.update(1, fahren);
+                    case "F-C":
+                        int celsius = tempCalc.FtoC(inputTemp);
+                        IF.update(1, celsius);
+                }
+            }//end if statement
 
-        }
+            if(ticket.contains("SCICALC")){
+                //Get mode, input number list
+                String mode = ticket.substring(8, 9);
+                String inputStr = ticket.substring(10);
+                String[] inputNumListStr = inputStr.split(", ");
+                ArrayList<Integer> inputNumList = ArrayList<>();
 
+                //Convert string inputs to integer
+                for(String numStr : inputNumListStr){
+                    int num = Integer.parseInt(numStr);
+                    inputNumList.add(num);
+                }
 
+                //Perform calculation
+                int finalNum = scientificCalc.calculate(mode, inputNumList);
+                
+                //Send calculation to Central DB
+                IF.update(1, Integer.toString(finalNum));
+            }//end if statement
 
-
-
+        } //end while loop
+        
     }
+
 }
