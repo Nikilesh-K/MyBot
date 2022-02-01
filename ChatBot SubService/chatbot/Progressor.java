@@ -27,13 +27,20 @@ public class Progressor {
             Topic.MOVIES, movieQuestions
     );
     public ArrayList<Topic> usedTopics = new ArrayList<>();
+
+    //TODO FOR HANDLERS: Add response variation
     private void nameHandler(String phrase){
+        String processedPhrase = phrase.toLowerCase();
         String[] phraseArray = phrase.split("\\s");
         String[] operatives = {"my", "name", "is", "the", "'s"};
+
+        //If only the name is in the response
         if (phraseArray.length == 1){
-            System.out.println("That's a great name, " + phraseArray[0] + "!");
+            //Capitalizing first letter of name for better precision
+            this.name = phraseArray[0].substring(0, 1).toUpperCase() + phraseArray.substring(1);
         }
         else{
+            //Loop through response, look for a name.
             for(int i = 0; i < phraseArray.length; i++){
                 boolean isOperative = Arrays.asList(operatives).contains(phraseArray[i]);
                 if(!isOperative){
@@ -50,44 +57,36 @@ public class Progressor {
         String processedPhrase = phrase.toLowerCase();
         String[] posKeys = {"good", "fine", "well", "ok", "okay"};
         String[] negKeys = {"bad", "terrible", "horrible", "not"};
-        boolean isPosKey = false;
         for (String posKey : posKeys) {
             if (processedPhrase.contains(posKey)) {
                 this.mood = posKey;
-                isPosKey = true;
-                break;
+                System.out.println("Great!");
+                return;
             }
         }
-        if(isPosKey){
-            System.out.println("Great!");
-        }
-        else {
-            for (String negKey : negKeys) {
-                if (processedPhrase.contains(negKey)) {
-                    this.mood = negKey;
-                    System.out.println("Oh no, hope you'll do better soon!");
-                    break;
-                }
+        
+        for (String negKey : negKeys) {
+            if (processedPhrase.contains(negKey)) {
+                this.mood = negKey;
+                System.out.println("Oh no, hope you'll do better soon!");
+                return;
             }
         }
 
     }
 
     private void moviesHandler(String phrase){
-        String[] operatives = {"I", "liked", "loved", "watched", "watching"};
+        String[] operatives = {"I", "liked", "loved", "watched", "watching", "love", "life", "my", "favorite", "movie", "is"};
         String[] phraseArray = phrase.split("\\s");
         for(int i = 0; i < phraseArray.length; i++){
-            for(int j = 0; j < operatives.length; j++){
-                if(Arrays.asList(operatives).contains(phraseArray[j])){
-                   break;
-                }
-                if(j == operatives.length - 1){
-                    for(String element : phraseArray){
-                        movies.add(element);
-                    }
-                }
+            boolean isOperative = Arrays.asList(operatives).contains(phraseArray[i]);
+            if(!isOperative){
+                this.movie = phraseArray[i].substring(0, 1) + phraseArray[i].substring(1);
+                break;
             }
         }
+
+        System.out.println(this.movie + " sounds like a great movie!");
     }
 
     public void process(Topic topic, String phrase){
@@ -106,30 +105,27 @@ public class Progressor {
 
     //WIP
     public void askSession(Scanner inputObj){
-        while(true){
-            ArrayList<Topic> topicConstants= new ArrayList<>(
-                    Arrays.asList(Topic.NAME, Topic.MOOD, Topic.MOVIES)
-            );
-            for(Topic topic : this.usedTopics){
-                topicConstants.remove(topic);
-            }
+        ArrayList<Topic> topicConstants = new ArrayList<>(
+            Arrays.asList(Topic.NAME, Topic.MOOD, Topic.MOVIES)
+        );
 
-            if(topicConstants.size() == 0){
-                break;
-            }
+        while(topicConstants.size() > 0){
+            //Choose topic
             Random randObj = new Random();
             int topicIndex = randObj.nextInt(topicConstants.size());
             Topic chosenTopic = topicConstants.get(topicIndex);
             ArrayList<String> topicQuestions = this.topicQuestionMapping.get(chosenTopic);
 
+            //Choose question for topic
             int questionIndex = randObj.nextInt(topicQuestions.size());
             String chosenQuestion = topicQuestions.get(questionIndex);
             System.out.println(chosenQuestion);
             String userResponse = inputObj.nextLine();
+
+            //Call handler for specified topic
             process(chosenTopic, userResponse);
 
-            this.usedTopics.add(chosenTopic);
-
+            topicConstants.remove(chosenTopic);
         }
     }
 }

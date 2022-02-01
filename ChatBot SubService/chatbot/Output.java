@@ -1,3 +1,4 @@
+//Temporary class for testing ChatBot features
 package chatbot;
 import chatbot.Progressor.Topic;
 import java.util.Scanner;
