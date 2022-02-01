@@ -54,9 +54,11 @@ def play(vClient, mpeg_ops, ydl_ops, query):
 #Play a song from Youtube, loop if needed - calls play()
 @client.command()
 async def playtube(ctx, query, loopChoice):
-    YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True', 'continue': 'True'}
+    YDL_OPTIONS = {'format': "best",
+                   'noplaylist': True,
+                   'source_address': '0.0.0.0'}
     FFMPEG_OPTIONS = {
-        'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 50', 'options': '-vn'}
+        'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 
     voice_state = ctx.author.voice
     if voice_state == None:
