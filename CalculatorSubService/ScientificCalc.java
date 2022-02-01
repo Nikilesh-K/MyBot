@@ -16,8 +16,9 @@ public class ScientificCalc{
                         finalNum += numList.get(i); 
                     }
                 }
+
             case "-":
-                int finalNum = numList.get(0) - numList.get(1);
+                finalNum = numList.get(0) - numList.get(1);
                 if(numList.size() == 2){
                     return finalNum;
                 }
@@ -27,7 +28,7 @@ public class ScientificCalc{
                     }
                 }
             case "*":
-                int finalNum = numList.get(0) * numList.get(1);
+                finalNum = numList.get(0) * numList.get(1);
                 if(numList.size() == 2){
                     return finalNum;
                 }
@@ -37,7 +38,7 @@ public class ScientificCalc{
                     }
                 }
             case "/":
-                int finalNum = numList.get(0) / numList.get(1);
+                finalNum = numList.get(0) / numList.get(1);
                 if(numList.size() == 2){
                     return finalNum;
                 }
@@ -46,6 +47,9 @@ public class ScientificCalc{
                         finalNum /= numList.get(i); 
                     }
                 }
+
+            default:
+                return 0;
         }//end switch
     }
 }

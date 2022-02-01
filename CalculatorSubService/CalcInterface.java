@@ -1,7 +1,7 @@
 import java.sql.*;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
-public class Interface{
+public class CalcInterface{
     public boolean runStatus = true;
 
     public Connection connect(){
@@ -9,7 +9,7 @@ public class Interface{
         Connection conn = null;
         try{
             Class.forName("org.sqlite.JDBC");
-            conn = DriverManager.getConnection("jdbc:sqlite:C:/All Stuff/Programming/RPGdata.db");
+            conn = DriverManager.getConnection("jdbc:sqlite:C:/All Stuff/Programming/MyBot/SQLite Central DB/Central DB.db");
         } catch(Exception e){
             System.err.println(e.getMessage());
             System.exit(0);
@@ -25,16 +25,7 @@ public class Interface{
             ResultSet rs = statement.executeQuery(command)){
             while(rs.next()){
                 ticket = rs.getString("TICKET");
-                /*
-                System.out.println(rs.getInt("ID") + "\t"
-                        + rs.getString("TICKET") + "\t"
-                        + rs.getString("RESPONSE") + "\t");
-
-                 */
-
-
             }
-
         }
 
         catch(SQLException e){
@@ -66,17 +57,14 @@ public class Interface{
     }
 
     public static void main(String[] args) throws InterruptedException{
-        Interface IF = new Interface();
+        CalcInterface IF = new CalcInterface();
         TempCalc tempCalc = new TempCalc();
         ScientificCalc scientificCalc = new ScientificCalc();
-
         IF.connect();
-        Thread thread = new Thread(IF);
-        thread.start();
-
-        while(runStatus){
+        System.out.println("Connecting!");
+        while(IF.runStatus){
             //Listen for ticket
-            String ticket = listen();
+            String ticket = IF.listen();
             
             //Check ticket content
             if(ticket.contains("TEMPCALC")){
@@ -88,10 +76,10 @@ public class Interface{
                 switch(mode){
                     case "C-F":
                         int fahren = tempCalc.CtoF(inputTemp);
-                        IF.update(1, fahren);
+                        IF.update(1, Integer.toString(fahren));
                     case "F-C":
                         int celsius = tempCalc.FtoC(inputTemp);
-                        IF.update(1, celsius);
+                        IF.update(1, Integer.toString(celsius));
                 }
             }//end if statement
 
@@ -100,7 +88,7 @@ public class Interface{
                 String mode = ticket.substring(8, 9);
                 String inputStr = ticket.substring(10);
                 String[] inputNumListStr = inputStr.split(", ");
-                ArrayList<Integer> inputNumList = ArrayList<>();
+                ArrayList<Integer> inputNumList = new ArrayList<>();
 
                 //Convert string inputs to integer
                 for(String numStr : inputNumListStr){
