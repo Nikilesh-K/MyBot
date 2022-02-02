@@ -28,15 +28,16 @@ async def on_ready():
 
 def listen(username, subservice):
     while True:
-        data = cursor.execute("SELECT * FROM ?", (subservice,))
+        data = cursor.execute("SELECT * FROM " + subservice)
         for row in data:
             if row[1] == username:
                 response = row[3]
-                if response != None or response != " ":
+                if response != None and response != " ":
                     return response
 
 def send(subservice, command, username):
-    cursor.execute("UPDATE ? SET TICKET = ? WHERE USERNAME = ?;", (subservice, command, username,))
+    cursor.execute("UPDATE '{subservice}' SET TICKET = '{command}' WHERE USERNAME = '{username}'".format(subservice=subservice, command=command, username=username))
+    dataConn.commit()
 
 @client.command()
 async def tempcalc(ctx, mode, inputTemp):

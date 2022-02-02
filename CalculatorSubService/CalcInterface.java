@@ -61,7 +61,6 @@ public class CalcInterface{
         TempCalc tempCalc = new TempCalc();
         ScientificCalc scientificCalc = new ScientificCalc();
         IF.connect();
-        System.out.println("Connecting!");
         while(IF.runStatus){
             //Listen for ticket
             String ticket = IF.listen();

@@ -1,3 +1,4 @@
+package chatbot;
 import java.sql.*;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
@@ -34,8 +35,8 @@ public class ChatInterface{
         return ticket;
     }
 
-    public void update(){
-        String command = "UPDATE CALCULATOR SET RESPONSE = ? WHERE ID = ?";
+    public void update(int id, String response){
+        String command = "UPDATE CHATBOT SET RESPONSE = ? WHERE ID = ?";
         try(Connection conn = this.connect();
             PreparedStatement PS = conn.prepareStatement(command)){
             PS.setString(1, response);

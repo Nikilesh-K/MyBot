@@ -37,7 +37,7 @@ public class Progressor {
         //If only the name is in the response
         if (phraseArray.length == 1){
             //Capitalizing first letter of name for better precision
-            this.name = phraseArray[0].substring(0, 1).toUpperCase() + phraseArray.substring(1);
+            this.name = phraseArray[0].substring(0, 1).toUpperCase() + phraseArray[0].substring(1);
         }
         else{
             //Loop through response, look for a name.
@@ -81,12 +81,12 @@ public class Progressor {
         for(int i = 0; i < phraseArray.length; i++){
             boolean isOperative = Arrays.asList(operatives).contains(phraseArray[i]);
             if(!isOperative){
-                this.movie = phraseArray[i].substring(0, 1) + phraseArray[i].substring(1);
+                this.movies.add(phraseArray[i].substring(0, 1) + phraseArray[i].substring(1));
                 break;
             }
         }
 
-        System.out.println(this.movie + " sounds like a great movie!");
+        System.out.println(this.movies.get(0) + " sounds like a great movie!");
     }
 
     public void process(Topic topic, String phrase){
