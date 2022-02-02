@@ -35,12 +35,12 @@ public class ChatInterface{
         return ticket;
     }
 
-    public void update(int id, String response){
-        String command = "UPDATE CHATBOT SET RESPONSE = ? WHERE ID = ?";
+    public void update(String username, String response){
+        String command = "UPDATE CHATBOT SET RESPONSE = ? WHERE USERNAME = ?";
         try(Connection conn = this.connect();
             PreparedStatement PS = conn.prepareStatement(command)){
             PS.setString(1, response);
-            PS.setInt(2, id);
+            PS.setString(2, username);
             PS.executeUpdate();
 
         } catch(SQLException e){
