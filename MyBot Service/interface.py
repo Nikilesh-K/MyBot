@@ -39,6 +39,11 @@ def send(subservice, command, username):
     cursor.execute("UPDATE '{subservice}' SET TICKET = '{command}' WHERE USERNAME = '{username}'".format(subservice=subservice, command=command, username=username))
     dataConn.commit()
 
+def resetDB(subservice, username):
+    cursor.execute("UPDATE '{subservice}' SET TICKET = ' ' WHERE USERNAME = '{username}'".format(subservice=subservice), command=command)
+    cursor.execute("UPDATE '{subservice}' SET RESPONSE = ' ' WHERE USERNAME = '{username}'".format(subservice=subservice), command=command)
+    dataConn.commit()
+
 @client.command()
 async def tempcalc(ctx, mode, inputTemp):
     command = "TEMPCALC " + mode + " " + inputTemp
@@ -46,8 +51,16 @@ async def tempcalc(ctx, mode, inputTemp):
     response = listen(ctx.author.name, "CALCULATOR")
     await ctx.channel.send(response)
 
-    cursor.execute("UPDATE CALCULATOR SET TICKET = ' ' WHERE USERNAME = ' "+ ctx.author.name + "'")
-    cursor.execute("UPDATE CALCULATOR SET RESPONSE = ' ' WHERE USERNAME = ' "+ ctx.author.name + "'" )
-    dataConn.commit()
+    resetDB("CALCULATOR", ctx.author.name)
+
+
+@client.command()
+async def scicalc(ctx, mode, inputList):
+    command = "SCICALC " + mode + " " + inputList
+    send("CALCULATOR", command, ctx.author.name)
+    response = listen(ctx.author.name, "CALCULATOR")
+    await ctx.channel.send(response)
+
+    resetDB("CALCULATOR", ctx.author.name)
 
 client.run(TOKEN)
