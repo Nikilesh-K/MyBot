@@ -104,7 +104,7 @@ public class Progressor {
     }
 
     //WIP
-    public void askSession(Scanner inputObj){
+    public void startSession(Scanner inputObj){
         ArrayList<Topic> topicConstants = new ArrayList<>(
             Arrays.asList(Topic.NAME, Topic.MOOD, Topic.MOVIES)
         );

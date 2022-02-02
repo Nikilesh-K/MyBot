@@ -34,14 +34,13 @@ public class CalcInterface{
         return ticket;
     }
 
-    public void update(int id, String response){
-        String command = "UPDATE CALCULATOR SET RESPONSE = ? WHERE ID = ?";
+    public void update(String username, String response){
+        String command = "UPDATE CALCULATOR SET RESPONSE = ? WHERE USERNAME = ?";
         try(Connection conn = this.connect();
             PreparedStatement PS = conn.prepareStatement(command)){
             PS.setString(1, response);
-            PS.setInt(2, id);
+            PS.setString(2, username);
             PS.executeUpdate();
-
         } catch(SQLException e){
             System.out.println(e.getMessage());
         }
@@ -67,26 +66,29 @@ public class CalcInterface{
             
             //Check ticket content
             if(ticket.contains("TEMPCALC")){
-                //Get mode, input temp
-                String mode = ticket.substring(9, 12);
-                int inputTemp = Integer.parseInt(ticket.substring(13));
+                //Get mode, username, input temp
+                String[] ticketElements = ticket.split(" ");
+                String mode = ticketElements[1];
+                String username = ticketElements[2];
+                int inputTemp = Integer.parseInt(ticketElements[3]);
 
                 //Check mode, do calculation, update central DB
                 switch(mode){
                     case "C-F":
                         int fahren = tempCalc.CtoF(inputTemp);
-                        IF.update(1, Integer.toString(fahren));
+                        IF.update(username, Integer.toString(fahren));
                     case "F-C":
                         int celsius = tempCalc.FtoC(inputTemp);
-                        IF.update(1, Integer.toString(celsius));
+                        IF.update(username, Integer.toString(celsius));
                 }
             }//end if statement
 
             if(ticket.contains("SCICALC")){
                 //Get mode, input number list
-                String mode = ticket.substring(8, 9);
-                String inputStr = ticket.substring(10);
-                String[] inputNumListStr = inputStr.split(", ");
+                String[] ticketElements = ticket.split(" ");
+                String mode = ticketElements[1];
+                String username = ticketElements[2];
+                String[] inputNumListStr = ticketElements[3].split(">");
                 ArrayList<Integer> inputNumList = new ArrayList<>();
 
                 //Convert string inputs to integer
@@ -99,7 +101,7 @@ public class CalcInterface{
                 int finalNum = scientificCalc.calculate(mode, inputNumList);
                 
                 //Send calculation to Central DB
-                IF.update(1, Integer.toString(finalNum));
+                IF.update(username, Integer.toString(finalNum));
             }//end if statement
 
         } //end while loop
