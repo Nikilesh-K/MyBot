@@ -46,4 +46,8 @@ async def tempcalc(ctx, mode, inputTemp):
     response = listen(ctx.author.name, "CALCULATOR")
     await ctx.channel.send(response)
 
+    cursor.execute("UPDATE CALCULATOR SET TICKET = ' ' WHERE USERNAME = ' "+ ctx.author.name + "'")
+    cursor.execute("UPDATE CALCULATOR SET RESPONSE = ' ' WHERE USERNAME = ' "+ ctx.author.name + "'" )
+    dataConn.commit()
+
 client.run(TOKEN)
