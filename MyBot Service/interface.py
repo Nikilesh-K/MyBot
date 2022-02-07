@@ -40,8 +40,8 @@ def send(subservice, command, username):
     dataConn.commit()
 
 def resetDB(subservice, username):
-    cursor.execute("UPDATE '{subservice}' SET TICKET = ' ' WHERE USERNAME = '{username}'".format(subservice=subservice), command=command)
-    cursor.execute("UPDATE '{subservice}' SET RESPONSE = ' ' WHERE USERNAME = '{username}'".format(subservice=subservice), command=command)
+    cursor.execute("UPDATE '{subservice}' SET TICKET = ' ' WHERE USERNAME = '{username}'".format(subservice=subservice, username=username))
+    cursor.execute("UPDATE '{subservice}' SET RESPONSE = ' ' WHERE USERNAME = '{username}'".format(subservice=subservice, username=username))
     dataConn.commit()
 
 @client.command()

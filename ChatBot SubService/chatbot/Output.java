@@ -22,7 +22,7 @@ public class Output {
         progressor.usedTopics.add(starterTopic);
 
         inputObj.nextLine();
-        progressor.askSession(inputObj);
+        progressor.progress(inputObj);
 
 
 

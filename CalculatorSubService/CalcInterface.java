@@ -17,14 +17,14 @@ public class CalcInterface{
         return conn;
     }
 
-    private String read(){
+    private String read(String item){
         String ticket = null;
         String command = "SELECT * FROM CALCULATOR";
         try(Connection conn = this.connect();
             Statement statement = conn.createStatement();
             ResultSet rs = statement.executeQuery(command)){
             while(rs.next()){
-                ticket = rs.getString("TICKET");
+                ticket = rs.getString(item);
             }
         }
 
@@ -48,7 +48,7 @@ public class CalcInterface{
 
     public String listen(){
         while(true){
-            String ticket = this.read();
+            String ticket = this.read("TICKET");
             if(ticket != null){
                 return ticket;
             }
@@ -69,18 +69,24 @@ public class CalcInterface{
                 //Get mode, username, input temp
                 String[] ticketElements = ticket.split(" ");
                 String mode = ticketElements[1];
-                String username = ticketElements[2];
-                int inputTemp = Integer.parseInt(ticketElements[3]);
-
+                String username = IF.read("USERNAME");
+                int inputTemp = Integer.parseInt(ticketElements[2]);
+                System.out.println(inputTemp);
+                System.out.println(mode);
                 //Check mode, do calculation, update central DB
-                switch(mode){
-                    case "C-F":
-                        int fahren = tempCalc.CtoF(inputTemp);
-                        IF.update(username, Integer.toString(fahren));
-                    case "F-C":
-                        int celsius = tempCalc.FtoC(inputTemp);
-                        IF.update(username, Integer.toString(celsius));
+                if(mode.equals("C-F")) {
+                    int fahren = tempCalc.CtoF(inputTemp);
+                    IF.update(username, Integer.toString(fahren));
+                    System.out.println("Now calculating C-F");
+                    System.out.println(fahren);
                 }
+                else if(mode.equals("F-C")) {
+                    int celsius = tempCalc.FtoC(inputTemp);
+                    IF.update(username, Integer.toString(celsius));
+                    System.out.println("Now calculating F-C");
+                    System.out.println(celsius);
+                }
+                Thread.sleep(5000);
             }//end if statement
 
             if(ticket.contains("SCICALC")){

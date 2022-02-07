@@ -56,7 +56,7 @@ public class ChatInterface{
             }
         }
     }
-
+/*
     public static void main(String[] args){
         ChatInterface IF = new ChatInterface();
         SessionManager manager = new SessionManager(this);
@@ -71,5 +71,5 @@ public class ChatInterface{
             }
         }
     }
-
+*/
 }
