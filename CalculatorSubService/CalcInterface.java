@@ -89,27 +89,6 @@ public class CalcInterface{
                 Thread.sleep(5000);
             }//end if statement
 
-            if(ticket.contains("SCICALC")){
-                //Get mode, input number list
-                String[] ticketElements = ticket.split(" ");
-                String mode = ticketElements[1];
-                String username = ticketElements[2];
-                String[] inputNumListStr = ticketElements[3].split(">");
-                ArrayList<Integer> inputNumList = new ArrayList<>();
-
-                //Convert string inputs to integer
-                for(String numStr : inputNumListStr){
-                    int num = Integer.parseInt(numStr);
-                    inputNumList.add(num);
-                }
-
-                //Perform calculation
-                int finalNum = scientificCalc.calculate(mode, inputNumList);
-                
-                //Send calculation to Central DB
-                IF.update(username, Integer.toString(finalNum));
-            }//end if statement
-
         } //end while loop
         
     }
