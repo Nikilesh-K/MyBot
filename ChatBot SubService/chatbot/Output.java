@@ -2,29 +2,32 @@
 package chatbot;
 import chatbot.Progressor.Topic;
 import java.util.Scanner;
+import java.util.ArrayList;
 public class Output {
-    public void print(String output){
-        System.out.println(output);
-    }
+    Scanner inputObj = new Scanner(System.in);
+
     public static void main(String[] args){
         CStarter cstarter = new CStarter();
         Progressor progressor = new Progressor();
-        System.out.println("Type here: ");
-        Scanner inputObj = new Scanner(System.in);
-        inputObj.nextLine();
-
+        Terminator terminator = new Terminator();
+        Output output = new Output();
+        
+        //Start of conversation
         String starterPhrase = cstarter.choosePhrase();
-        System.out.println(starterPhrase);
-        Topic starterTopic = cstarter.getTopic(starterPhrase);
+        output.write(starterPhrase);
 
-        String userPhrase = inputObj.nextLine();
-        progressor.process(starterTopic, userPhrase);
-        progressor.usedTopics.add(starterTopic);
+        //Progress conversation - pass output handling to Progressor
+        progressor.progress(output);
 
-        inputObj.nextLine();
-        progressor.progress(inputObj);
+        //Terminate conversation
+    }
 
+    public void write(String output){
+        System.out.println(output);
+    }
 
-
+    public String read(){
+        String userResponse = inputObj.nextLine();
+        return userResponse;
     }
 }

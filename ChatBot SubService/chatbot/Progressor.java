@@ -26,9 +26,8 @@ public class Progressor {
             Topic.MOOD, moodQuestions,
             Topic.MOVIES, movieQuestions
     );
-    public ArrayList<Topic> usedTopics = new ArrayList<>();
 
-    //TODO FOR HANDLERS: Add response variation
+    //TODO FOR HANDLERS: Add response variation, have handlers return responses
     private void nameHandler(String phrase){
         String processedPhrase = phrase.toLowerCase();
         String[] phraseArray = phrase.split("\\s");
@@ -48,9 +47,8 @@ public class Progressor {
                     break;
                 }
             }
-
-            System.out.println("That's a great name, " + this.name + "!");
         }
+        System.out.println("That's a great name, " + this.name + "!");
     }
 
     private void moodHandler(String phrase){
@@ -72,7 +70,6 @@ public class Progressor {
                 return;
             }
         }
-
     }
 
     private void moviesHandler(String phrase){
@@ -103,7 +100,7 @@ public class Progressor {
         }
     }
 
-    public void progress(Scanner inputObj){
+    public void progress(Output output){
         ArrayList<Topic> topicConstants = new ArrayList<>(
             Arrays.asList(Topic.NAME, Topic.MOOD, Topic.MOVIES)
         );
@@ -118,8 +115,12 @@ public class Progressor {
             //Choose question for topic
             int questionIndex = randObj.nextInt(topicQuestions.size());
             String chosenQuestion = topicQuestions.get(questionIndex);
-            System.out.println(chosenQuestion);
-            String userResponse = inputObj.nextLine();
+
+            //Write to console
+            output.write(chosenQuestion);
+
+            //Read user input
+            String userResponse = output.read();
 
             //Call handler for specified topic
             process(chosenTopic, userResponse);
@@ -127,4 +128,5 @@ public class Progressor {
             topicConstants.remove(chosenTopic);
         }
     }
+
 }
