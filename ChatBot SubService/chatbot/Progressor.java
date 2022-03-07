@@ -27,8 +27,10 @@ public class Progressor {
             Topic.MOVIES, movieQuestions
     );
 
-    //TODO FOR HANDLERS: Add response variation, have handlers return responses
-    private void nameHandler(String phrase){
+    private Topic currentTopic;
+
+    //TODO FOR HANDLERS: Add response variation
+    private String nameHandler(String phrase){
         String processedPhrase = phrase.toLowerCase();
         String[] phraseArray = phrase.split("\\s");
         String[] operatives = {"my", "name", "is", "the", "'s"};
@@ -48,31 +50,29 @@ public class Progressor {
                 }
             }
         }
-        System.out.println("That's a great name, " + this.name + "!");
+        return "That's a great name, " + this.name + "!";
     }
 
-    private void moodHandler(String phrase){
+    private String moodHandler(String phrase){
         String processedPhrase = phrase.toLowerCase();
         String[] posKeys = {"good", "fine", "well", "ok", "okay"};
         String[] negKeys = {"bad", "terrible", "horrible", "not"};
         for (String posKey : posKeys) {
             if (processedPhrase.contains(posKey)) {
-                this.mood = posKey;
-                System.out.println("Great!");
-                return;
+                this.mood = posKey; 
+                return "Great!";
             }
         }
         
         for (String negKey : negKeys) {
             if (processedPhrase.contains(negKey)) {
                 this.mood = negKey;
-                System.out.println("Oh no, hope you'll do better soon!");
-                return;
+                return "Oh no, hope you'll do better soon!";
             }
         }
     }
 
-    private void moviesHandler(String phrase){
+    private String moviesHandler(String phrase){
         String[] operatives = {"I", "liked", "loved", "watched", "watching", "love", "life", "my", "favorite", "movie", "is"};
         String[] phraseArray = phrase.split("\\s");
         for(int i = 0; i < phraseArray.length; i++){
@@ -83,50 +83,59 @@ public class Progressor {
             }
         }
 
-        System.out.println(this.movies.get(0) + " sounds like a great movie!");
+        return this.movies.get(0) + " sounds like a great movie!";
     }
 
-    public void process(Topic topic, String phrase){
+    public String process(Topic topic, String phrase){
+        String response = " ";
         switch(topic){
             case NAME:
-                nameHandler(phrase);
+                response = nameHandler(phrase);
                 break;
             case MOOD:
-                moodHandler(phrase);
+                response = moodHandler(phrase);
                 break;
             case MOVIES:
-                moviesHandler(phrase);
+                response = moviesHandler(phrase);
                 break;
         }
+        return response;
     }
 
-    public void progress(Output output){
+    public void progress(IF interface, String username){
         ArrayList<Topic> topicConstants = new ArrayList<>(
             Arrays.asList(Topic.NAME, Topic.MOOD, Topic.MOVIES)
         );
 
-        while(topicConstants.size() > 0){
-            //Choose topic
-            Random randObj = new Random();
-            int topicIndex = randObj.nextInt(topicConstants.size());
-            Topic chosenTopic = topicConstants.get(topicIndex);
-            ArrayList<String> topicQuestions = this.topicQuestionMapping.get(chosenTopic);
-
-            //Choose question for topic
-            int questionIndex = randObj.nextInt(topicQuestions.size());
-            String chosenQuestion = topicQuestions.get(questionIndex);
-
-            //Write to console
-            output.write(chosenQuestion);
-
-            //Read user input
-            String userResponse = output.read();
-
-            //Call handler for specified topic
-            process(chosenTopic, userResponse);
-
-            topicConstants.remove(chosenTopic);
+        //Deactivate interface
+        if(topicConstants.size() == 0){
+            IF.runStatus = false;
+            return;
         }
+
+        //Choose topic
+        Random randObj = new Random();
+        int topicIndex = randObj.nextInt(topicConstants.size());
+        Topic chosenTopic = topicConstants.get(topicIndex);
+        ArrayList<String> topicQuestions = this.topicQuestionMapping.get(chosenTopic);
+
+        //Choose question for topic
+        int questionIndex = randObj.nextInt(topicQuestions.size());
+        String chosenQuestion = topicQuestions.get(questionIndex);
+
+        //Update interface
+        IF.update(username, chosenQuestion);
+
+        //Set current topic so Progressor can remember
+        currentTopic = chosenTopic;
+    }
+
+    public void reply(IF interface, String userResponse, String username){
+        String response = process(currentTopic, userResponse);
+
+        IF.update(username, response);
+
+        topicConstants.remove(chosenTopic);
     }
 
 }
