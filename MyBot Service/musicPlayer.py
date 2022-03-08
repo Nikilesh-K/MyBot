@@ -17,6 +17,10 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 client = commands.Bot(command_prefix="*", intents=intents)
 
+#Sqlite Connection Code
+dataConn = sqlite3.connect('C:\All Stuff\Programming\MyBot\SQLite Central DB\Central DB.db')
+cursor = dataConn.cursor()
+
 #Activation Indicator
 @client.event
 async def on_ready():
@@ -103,5 +107,5 @@ async def dc(ctx):
     voiceClient = client.voice_clients[0]
     await voiceClient.disconnect()
     await ctx.channel.send("Disconnected!")
-
+    
 client.run(TOKEN)

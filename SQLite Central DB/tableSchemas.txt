@@ -1,7 +1,7 @@
 Schema reference for each data table stored in the Central DB
 
 RPG:
-
+----------------
 Name: MONEY_DATA
 Purpose: Store amount of money for each user
 Schema:
@@ -28,20 +28,30 @@ Schema:
     - Column 6: WEAPON_DAMAGE (INT)
 
 SubServices:
-
+----------------
 Name: CALCULATOR
 Purpose: Provide communication between Calculator SubService and MyBot Service
 Schema:
     - Column 1: ID (INT) - PRIMARY KEY
-    - Column 2: USERNAME (STRING)
-    - Column 3: TICKET (STRING)
-    - Column 4: RESPONSE (STRING)
+    - Column 2: USERNAME (TEXT)
+    - Column 3: TICKET (TEXT)
+    - Column 4: RESPONSE (TEXT)
 
 Name: CHATBOT
 Purpose: Provide communication between ChatBot SubService and MyBot Service
     - Column 1: ID (INT) - PRIMARY KEY
-    - Column 2: USERNAME (STRING)
-    - Column 3: TICKET (STRING)
-    - Column 4: RESPONSE (STRING)
+    - Column 2: USERNAME (TEXT)
+    - Column 3: TICKET (TEXT)
+    - Column 4: RESPONSE (TEXT)
 
-Total Tables: 5
+Music:
+--------------
+Name: PLAYLIST
+Purpose: Provide musicPlayer a way to store custom user playlists
+	- Column 1: ID (INT) - PRIMARY KEY
+	- Column 2: USERNAME (TEXT)
+	- Column 3: SONGS (TEXT)
+	- Column 4: SONGNUM (TEXT)
+	- Column 5: LISTNAME (TEXT)
+
+Total Tables: 6
