@@ -42,7 +42,7 @@ async def connect(ctx):
 def play(vClient, mpeg_ops, ydl_ops, query):
     with YoutubeDL(ydl_ops) as ydl:
         info = ydl.extract_info(f"ytsearch:{query}", download=False)['entries'][0]
-    URL = info['formats'][0]['url']
+    URL = info['formats'][2]['url']
     PCMObj = discord.FFmpegPCMAudio(executable="C:/ffmpeg/ffmpeg-4.4-full_build/ffmpeg-4.4-full_build/bin/ffmpeg.exe", source=URL, before_options=mpeg_ops)
     vClient.play(PCMObj)
     return info
@@ -53,7 +53,7 @@ def play(vClient, mpeg_ops, ydl_ops, query):
 #Play a song from Youtube, loop if needed - calls play()
 @client.command()
 async def playtube(ctx, query, loopChoice):
-    YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True', 'continue': 'True'}
+    YDL_OPTIONS = {'format': 'bestaudio', 'extractaudio': True, 'noplaylist': True, 'continue': True}
     FFMPEG_OPTIONS = {
         'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 
