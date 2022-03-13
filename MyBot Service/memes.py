@@ -29,7 +29,6 @@ async def on_ready():
 #REDDIT - Pull recent posts off of Reddit
 
 #Find a meme from Reddit
-#WIP
 @client.command()
 async def meme(ctx):
     auth = requests.auth.HTTPBasicAuth(REDDIT_ID, REDDIT_SECRET)
@@ -40,11 +39,12 @@ async def meme(ctx):
     res = requests.post('https://www.reddit.com/api/v1/access_token', auth=auth, data=data, headers=headers)
     token = res.json()['access_token']
     headers = {**headers, **{'Authorization': f"bearer {token}"}}
-    requests.get('https://oauth.reddit.com/api/v1/me', headers=headers)
 
-    posts = requests.get("https://oauth.reddit.com/r/memes/hot", headers=headers)
+    posts = requests.get("https://oauth.reddit.com/r/memes", headers=headers)
     postData = posts.json()
-    post = postData['data']['children'][randint(0, postData.length)]
+    postNum = len(postData['data']['children'])
+    post = postData['data']['children'][randint(0, postNum - 1)]
     await ctx.channel.send(post['data']['title'])
+    await ctx.channel.send(post['data']['url'])
     
 client.run(TOKEN)
