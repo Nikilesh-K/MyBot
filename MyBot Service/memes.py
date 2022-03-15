@@ -28,9 +28,8 @@ async def on_ready():
 
 #REDDIT - Pull recent posts off of Reddit
 
-#Find a meme from Reddit
-@client.command()
-async def meme(ctx):
+#Authenticate with the Reddit API
+def auth():
     auth = requests.auth.HTTPBasicAuth(REDDIT_ID, REDDIT_SECRET)
     data = {'grant_type': 'password',
             'username': REDDIT_USERNAME,
@@ -39,12 +38,32 @@ async def meme(ctx):
     res = requests.post('https://www.reddit.com/api/v1/access_token', auth=auth, data=data, headers=headers)
     token = res.json()['access_token']
     headers = {**headers, **{'Authorization': f"bearer {token}"}}
+    return headers
 
+#Find a meme from Reddit
+@client.command()
+async def meme(ctx):
+    headers = auth()
     posts = requests.get("https://oauth.reddit.com/r/memes", headers=headers)
     postData = posts.json()
     postNum = len(postData['data']['children'])
     post = postData['data']['children'][randint(0, postNum - 1)]
     await ctx.channel.send(post['data']['title'])
     await ctx.channel.send(post['data']['url'])
+
+#Find a post from any subreddit
+@client.command()
+async def getpost(ctx, subreddit):
+    headers = auth()
+    posts = requests.get("https://oauth.reddit.com/r/{subreddit}".format(subreddit=subreddit), headers = headers)
+    if posts.status_code == 404:
+        await ctx.channel.send("Subreddit doesn't exist")
+        return
+    postData = posts.json()
+    postNum = len(postData['data']['children'])
+    post = postData['data']['children'][randint(0, postNum - 1)]
+    await ctx.channel.send(post['data']['title'])
+    await ctx.channel.send(post['data']['url'])
+
     
 client.run(TOKEN)

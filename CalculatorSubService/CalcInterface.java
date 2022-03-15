@@ -58,7 +58,6 @@ public class CalcInterface{
     public static void main(String[] args) throws InterruptedException{
         CalcInterface IF = new CalcInterface();
         TempCalc tempCalc = new TempCalc();
-        ScientificCalc scientificCalc = new ScientificCalc();
         IF.connect();
         while(IF.runStatus){
             //Listen for ticket

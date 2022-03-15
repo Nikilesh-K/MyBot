@@ -20,7 +20,7 @@ public class ChatInterface{
 
     private String read(){
         String ticket = null;
-        String command = "SELECT * FROM CALCULATOR";
+        String command = "SELECT * FROM CHATBOT";
         try(Connection conn = this.connect();
             Statement statement = conn.createStatement();
             ResultSet rs = statement.executeQuery(command)){
@@ -63,9 +63,12 @@ public class ChatInterface{
         Progressor progressor = new Progressor();
         Terminator terminator = new Terminator();
 
+        System.out.println("ChatInterface active");
+
         while(IF.runStatus){
-            String ticket = listen();
-            if(ticket.contains("CSTART")){
+            String ticket = IF.listen();
+            if(ticket.contains("CSTART ")){
+                System.out.println("CSTART Activated!");
                 String[] ticketElements = ticket.split(" ");
                 String username = ticketElements[1];
                 
@@ -73,21 +76,21 @@ public class ChatInterface{
                 IF.update(username, starterPhrase);
             }
 
-            if(ticket.contains("PROGSTART")){
+            if(ticket.contains("PROGSTART ")){
                 String[] ticketElements = ticket.split(" ");
                 String username = ticketElements[1];
 
                 //Pass output handling to Progressor
-                progressor.progress(this);
+                progressor.progress(IF, username);
             }
 
-            if(ticket.contains("PROGRESS")){
+            if(ticket.contains("PROGRESS ")){
                 String[] ticketElements = ticket.split(" ");
                 String username = ticketElements[1];
 
-                reply(IF, ticketElements[2], username);
+                progressor.reply(IF, ticketElements[2], username);
 
-                progress(IF, username);
+                progressor.progress(IF, username);
             }
         }
     }

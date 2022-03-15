@@ -70,6 +70,7 @@ public class Progressor {
                 return "Oh no, hope you'll do better soon!";
             }
         }
+        return "Oh, ok.";
     }
 
     private String moviesHandler(String phrase){
@@ -102,7 +103,7 @@ public class Progressor {
         return response;
     }
 
-    public void progress(IF interface, String username){
+    public void progress(ChatInterface IF, String username){
         ArrayList<Topic> topicConstants = new ArrayList<>(
             Arrays.asList(Topic.NAME, Topic.MOOD, Topic.MOVIES)
         );
@@ -130,12 +131,16 @@ public class Progressor {
         currentTopic = chosenTopic;
     }
 
-    public void reply(IF interface, String userResponse, String username){
+    public void reply(ChatInterface IF, String userResponse, String username){
+        ArrayList<Topic> topicConstants = new ArrayList<>(
+                Arrays.asList(Topic.NAME, Topic.MOOD, Topic.MOVIES)
+        );
+
         String response = process(currentTopic, userResponse);
 
         IF.update(username, response);
 
-        topicConstants.remove(chosenTopic);
+        topicConstants.remove(currentTopic);
     }
 
 }

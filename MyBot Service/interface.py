@@ -18,6 +18,8 @@ client = commands.Bot(command_prefix="*", intents=intents)
 dataConn = sqlite3.connect('C:\All Stuff\Programming\MyBot\SQLite Central DB\Central DB.db')
 cursor = dataConn.cursor()
 
+#Command Reference lists
+chatRef = ["CSTART ", "PROGSTART ", "PROGRESS "]
 @client.event
 async def on_ready():
     for guild in client.guilds:
@@ -53,14 +55,16 @@ async def tempcalc(ctx, mode, inputTemp):
 
     resetDB("CALCULATOR", ctx.author.name)
 
-
 @client.command()
-async def scicalc(ctx, mode, inputList):
-    command = "SCICALC " + mode + " " + inputList
-    send("CALCULATOR", command, ctx.author.name)
-    response = listen(ctx.author.name, "CALCULATOR")
-    await ctx.channel.send(response)
+async def startchat(ctx):
+    #Create DM with author
+    dm = await ctx.author.create_dm()
 
-    resetDB("CALCULATOR", ctx.author.name)
+    #CSTART
+    startCmd = chatRef[0] + ctx.author.name
+    send("CHATBOT", startCmd, ctx.author.name)
+    startResponse = listen(ctx.author.name, "CHATBOT")
+    resetDB("CHATBOT", ctx.author.name)
+    await dm.send(startResponse)
 
 client.run(TOKEN)
