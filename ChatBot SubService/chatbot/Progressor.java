@@ -26,6 +26,9 @@ public class Progressor {
             Topic.MOOD, moodQuestions,
             Topic.MOVIES, movieQuestions
     );
+    private ArrayList<Topic> topicConstants = new ArrayList<>(
+            Arrays.asList(Topic.NAME, Topic.MOOD, Topic.MOVIES)
+    );
 
     private Topic currentTopic;
 
@@ -103,14 +106,11 @@ public class Progressor {
         return response;
     }
 
-    public void progress(ChatInterface IF, String username){
-        ArrayList<Topic> topicConstants = new ArrayList<>(
-            Arrays.asList(Topic.NAME, Topic.MOOD, Topic.MOVIES)
-        );
-
-        //Deactivate interface
+    public void progress(ChatInterface IF, String username, Terminator terminator){
+        //Start termination
         if(topicConstants.size() == 0){
-            IF.runStatus = false;
+            String termination = terminator.terminate();
+            IF.update(username, "TERMINATE " + termination);
             return;
         }
 
@@ -132,12 +132,7 @@ public class Progressor {
     }
 
     public void reply(ChatInterface IF, String userResponse, String username){
-        ArrayList<Topic> topicConstants = new ArrayList<>(
-                Arrays.asList(Topic.NAME, Topic.MOOD, Topic.MOVIES)
-        );
-
         String response = process(currentTopic, userResponse);
-
         IF.update(username, response);
 
         topicConstants.remove(currentTopic);

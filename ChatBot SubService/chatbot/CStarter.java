@@ -5,7 +5,7 @@ import java.util.Random;
 import java.util.Map;
 import chatbot.Progressor.Topic;
 public class CStarter {
-    ArrayList<String> phraseList = new ArrayList<>(
+    private ArrayList<String> phraseList = new ArrayList<>(
             Arrays.asList("Hello!", "Hi!")
     );
 

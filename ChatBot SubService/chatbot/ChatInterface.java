@@ -48,6 +48,17 @@ public class ChatInterface{
         }
     }
 
+    public void reset(String username){
+        String command = "UPDATE CHATBOT SET TICKET = ' ' WHERE USERNAME = ?";
+        try(Connection conn = this.connect();
+            PreparedStatement PS = conn.prepareStatement(command)){
+            PS.setString(1, username);
+            PS.executeUpdate();
+        } catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
     public String listen(){
         while(true){
             String ticket = this.read();
@@ -57,23 +68,21 @@ public class ChatInterface{
         }
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws InterruptedException {
         ChatInterface IF = new ChatInterface();
         CStarter cstarter = new CStarter();
         Progressor progressor = new Progressor();
         Terminator terminator = new Terminator();
 
-        System.out.println("ChatInterface active");
-
         while(IF.runStatus){
             String ticket = IF.listen();
             if(ticket.contains("CSTART ")){
-                System.out.println("CSTART Activated!");
                 String[] ticketElements = ticket.split(" ");
                 String username = ticketElements[1];
                 
                 String starterPhrase = cstarter.choosePhrase();
                 IF.update(username, starterPhrase);
+                IF.reset(username);
             }
 
             if(ticket.contains("PROGSTART ")){
@@ -81,7 +90,9 @@ public class ChatInterface{
                 String username = ticketElements[1];
 
                 //Pass output handling to Progressor
-                progressor.progress(IF, username);
+                progressor.progress(IF, username, terminator);
+
+                IF.reset(username);
             }
 
             if(ticket.contains("PROGRESS ")){
@@ -90,7 +101,11 @@ public class ChatInterface{
 
                 progressor.reply(IF, ticketElements[2], username);
 
-                progressor.progress(IF, username);
+                Thread.sleep(5000);
+
+                progressor.progress(IF, username, terminator);
+
+                IF.reset(username);
             }
         }
     }
