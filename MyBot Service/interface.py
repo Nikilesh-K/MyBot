@@ -19,7 +19,11 @@ dataConn = sqlite3.connect('C:\All Stuff\Programming\MyBot\SQLite Central DB\Cen
 cursor = dataConn.cursor()
 
 #Command Reference lists
-chatRef = ["CSTART ", "PROGSTART ", "PROGRESS "]
+chatRef = ["CSTART ", "PROGSTART ", "PROGRESS ", "TERMINATE "]
+
+#DB Table Names
+chatbot = "CHATBOT"
+calc = "CALCULATOR"
 @client.event
 async def on_ready():
     for guild in client.guilds:
@@ -48,11 +52,11 @@ def resetDB(subservice, username):
 @client.command()
 async def tempcalc(ctx, mode, inputTemp):
     command = "TEMPCALC " + mode + " " + inputTemp
-    send("CALCULATOR", command, ctx.author.name)
-    response = listen(ctx.author.name, "CALCULATOR")
+    send(calc, command, ctx.author.name)
+    response = listen(ctx.author.name, calc)
     await ctx.channel.send(response)
 
-    resetDB("CALCULATOR", ctx.author.name)
+    resetDB(calc, ctx.author.name)
 
 @client.command()
 async def startchat(ctx):
@@ -61,9 +65,9 @@ async def startchat(ctx):
 
     #CSTART
     startCmd = chatRef[0] + ctx.author.name
-    send("CHATBOT", startCmd, ctx.author.name)
-    response = listen(ctx.author.name, "CHATBOT")
-    resetDB("CHATBOT", ctx.author.name)
+    send(chatbot, startCmd, ctx.author.name)
+    response = listen(ctx.author.name, chatbot)
+    resetDB(chatbot, ctx.author.name)
     await dm.send(response)
 
     #Wait for user response - not used for PROGSTART
@@ -74,9 +78,9 @@ async def startchat(ctx):
     
     #PROGSTART
     progStartCmd = chatRef[1] + ctx.author.name
-    send("CHATBOT", progStartCmd, ctx.author.name)
-    response = listen(ctx.author.name, "CHATBOT")
-    resetDB("CHATBOT", ctx.author.name)
+    send(chatbot, progStartCmd, ctx.author.name)
+    response = listen(ctx.author.name, chatbot)
+    resetDB(chatbot, ctx.author.name)
     await dm.send(response)
     
     msg = None
@@ -90,32 +94,27 @@ async def startchat(ctx):
     needToTerminate = False
     while needToTerminate == False:
         progressCmd = chatRef[2] + ctx.author.name + " " + msg.content
-        send("CHATBOT", progressCmd, ctx.author.name)
+        send(chatbot, progressCmd, ctx.author.name)
         await asyncio.sleep(2)
-        responseToUser = listen(ctx.author.name, "CHATBOT")
+        responseToUser = listen(ctx.author.name, chatbot)
         await dm.send(responseToUser)
         #Keep listening for progression 
         while True:
-            progression = listen(ctx.author.name, "CHATBOT")
+            progression = listen(ctx.author.name, chatbot)
             #If progression has been sent
             if progression != responseToUser:
                 #If progression is a termination
-                if "TERMINATE" in progression:
-                    progression = progression.replace('TERMINATE ', '')
+                if chatRef[3] in progression:
+                    progression = progression.replace(chatRef[3], '')
                     needToTerminate = True
                 await dm.send(progression)
                 break
         
-        resetDB("CHATBOT", ctx.author.name)
+        resetDB(chatbot, ctx.author.name)
         #Wait for user response - used for PROGRESS
         def check(m):
             if m.author.name == ctx.author.name:
                 return m.content == m.content
         msg = await client.wait_for('message', check=check)
-
-#Used for developer convenience after testing
-@client.command()
-async def devReset(ctx, subservice, username):
-    cursor.execute("UPDATE '{subservice}' SET RESPONSE = ' ' WHERE USERNAME = '{username}'".format(subservice=subservice, username=username))
-    cursor.execute("UPDATE '{subservice}' SET TICKET = ' ' WHERE USERNAME = '{username}'".format(subservice=subservice, username=username))
+        
 client.run(TOKEN)
