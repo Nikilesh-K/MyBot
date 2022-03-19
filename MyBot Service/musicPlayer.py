@@ -46,7 +46,31 @@ def play(vClient, mpeg_ops, ydl_ops, query):
     PCMObj = discord.FFmpegPCMAudio(executable="C:/ffmpeg/ffmpeg-4.4-full_build/ffmpeg-4.4-full_build/bin/ffmpeg.exe", source=URL, before_options=mpeg_ops)
     vClient.play(PCMObj)
     return info
+
+#Write to a Table in the DB
+def writeDB(tableName, targetColumn, conditionColumn, targetData, conditionData):
+    command = "UPDATE {tableName} SET {targetColumn} = {targetData} WHERE {conditionColumn} = {conditionData};"
     
+    #Check data parameters - add quotes if str
+    if isinstance(targetData, str):
+        targetData = "'" + targetData + "'"
+    if isinstance(conditionData, str):
+        conditionData = "'" + conditionData + "'"
+        
+    cursor.execute(command.format(tableName = tableName, targetColumn = targetColumn, targetData = targetData, conditionColumn = conditionColumn, conditionData = conditionData))
+    dataConn.commit()
+    
+#Retrieve all data from a Table
+def retrieveTable(tableName):
+    tableData = cursor.execute("SELECT * FROM {table};".format(table = tableName))
+    return tableData
+
+#Retrieve data for a specified target (eg. user)
+def RetrieveDataFromTarget(rpgData, targetIndex, target, requestedIndex):
+    for row in rpgData:
+        if row[targetIndex] == target:
+            return row[requestedIndex]
+
 
 #Music Bot COMMANDS - Used by users to control operations
 
@@ -61,6 +85,7 @@ async def playtube(ctx, query, loopChoice):
     if voice_state == None:
         await ctx.channel.send("Please connect to a voice channel first.")
         return
+    
     vc = voice_state.channel
     voiceClient = await vc.connect()
 
@@ -107,5 +132,88 @@ async def dc(ctx):
     voiceClient = client.voice_clients[0]
     await voiceClient.disconnect()
     await ctx.channel.send("Disconnected!")
+
+#Add song to playlist
+@client.command()
+async def add(ctx, song):
+    playlistTable = retrieveTable("PLAYLIST")
+    currentSongs = RetrieveDataFromTarget(playlistTable, 1, ctx.author.name, 2)
+    processedSong = song.replace('-', '')
+    writeDB("PLAYLIST", "SONGS", "USERNAME", currentSongs + "-" + processedSong, ctx.author.name)
+    await ctx.channel.send("Added ***" + song + "*** to your playlist")
+
+@client.command()
+async def playlist(ctx):
+    embed = discord.Embed(
+        title=ctx.author.name + "'s Playlist",
+        color=discord.Color.blue())
+    playlistTable = retrieveTable("PLAYLIST")
+    currentSongs = RetrieveDataFromTarget(playlistTable, 1, ctx.author.name, 2)
+    songList = currentSongs.split('-')
+    for song in songList:
+        if song == '' or song == '-':
+            continue
+        else:
+            embed.add_field(name=song, value='\u200b', inline=False)
+    embed.add_field(name="Number of Songs: ", value=str(len(songList)), inline=False)
+    await ctx.channel.send(embed=embed)
+
+@client.command()
+async def shuffleplay(ctx):
+    playlistTable = retrieveTable("PLAYLIST")
+    currentSongs = RetrieveDataFromTarget(playlistTable, 1, ctx.author.name, 2)
+    songList = currentSongs.split('-')
+
+    YDL_OPTIONS = {'format': 'bestaudio', 'extractaudio': True, 'noplaylist': True, 'continue': True}
+    FFMPEG_OPTIONS = {
+        'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+
+    vc = ctx.author.voice.channel
+    voiceClient = await vc.connect()
     
+    while True:
+        songIndex = randint(0, len(songList) - 1)
+        if songList[songIndex] == '':
+            continue
+        urlInfo = play(voiceClient, FFMPEG_OPTIONS, YDL_OPTIONS, songList[songIndex])
+        await asyncio.sleep(urlInfo['duration'])
+        await asyncio.sleep(2)
+        if voiceClient.is_paused():
+            continue
+    
+@client.command()
+async def listplay(ctx, loopMode):
+    playlistTable = retrieveTable("PLAYLIST")
+    currentSongs = RetrieveDataFromTarget(playlistTable, 1, ctx.author.name, 2)
+    songList = currentSongs.split('-')
+
+    YDL_OPTIONS = {'format': 'bestaudio', 'extractaudio': True, 'noplaylist': True, 'continue': True}
+    FFMPEG_OPTIONS = {
+        'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+
+    vc = ctx.author.voice.channel
+    voiceClient = await vc.connect()
+    
+    if loopMode == "loopOn":
+        while True:
+            for song in songList:
+                if song == '':
+                    continue
+                urlInfo = play(voiceClient, FFMPEG_OPTIONS, YDL_OPTIONS, song)
+                await ctx.channel.send("Joined VC, playing: " + urlInfo['webpage_url'])
+                await asyncio.sleep(urlInfo['duration'])
+                await asyncio.sleep(2)
+                while voiceClient.is_paused():
+                    continue
+    else:
+        for song in songList:
+            if song == '':
+                continue
+            urlInfo = play(voiceClient, FFMPEG_OPTIONS, YDL_OPTIONS, song)
+            await ctx.channel.send("Joined VC, playing: " + urlInfo['webpage_url'])
+            await asyncio.sleep(urlInfo['duration'])
+            await asyncio.sleep(2)
+            while voiceClient.is_paused():
+                    continue
+
 client.run(TOKEN)
