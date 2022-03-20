@@ -176,6 +176,7 @@ async def shuffleplay(ctx):
         if songList[songIndex] == '':
             continue
         urlInfo = play(voiceClient, FFMPEG_OPTIONS, YDL_OPTIONS, songList[songIndex])
+        await ctx.channel.send("Joined VC, playing: " + urlInfo['webpage_url'])
         await asyncio.sleep(urlInfo['duration'])
         await asyncio.sleep(2)
         if voiceClient.is_paused():
