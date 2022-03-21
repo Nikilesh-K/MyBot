@@ -77,7 +77,7 @@ public class ChatInterface{
         while(IF.runStatus){
             String ticket = IF.listen();
             if(ticket.contains("CSTART ")){
-                String[] ticketElements = ticket.split(" ");
+                String[] ticketElements = ticket.split("-");
                 String username = ticketElements[1];
                 
                 String starterPhrase = cstarter.choosePhrase();
@@ -86,7 +86,7 @@ public class ChatInterface{
             }
 
             if(ticket.contains("PROGSTART ")){
-                String[] ticketElements = ticket.split(" ");
+                String[] ticketElements = ticket.split("-");
                 String username = ticketElements[1];
 
                 //Pass output handling to Progressor
@@ -96,7 +96,7 @@ public class ChatInterface{
             }
 
             if(ticket.contains("PROGRESS ")){
-                String[] ticketElements = ticket.split(" ");
+                String[] ticketElements = ticket.split("-");
                 String username = ticketElements[1];
 
                 progressor.reply(IF, ticketElements[2], username);

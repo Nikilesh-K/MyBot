@@ -64,7 +64,7 @@ async def startchat(ctx):
     dm = await ctx.author.create_dm()
 
     #CSTART
-    startCmd = chatRef[0] + ctx.author.name
+    startCmd = chatRef[0] + "-" + ctx.author.name
     send(chatbot, startCmd, ctx.author.name)
     response = listen(ctx.author.name, chatbot)
     resetDB(chatbot, ctx.author.name)
@@ -77,7 +77,7 @@ async def startchat(ctx):
     msg = await client.wait_for('message', check=check)
     
     #PROGSTART
-    progStartCmd = chatRef[1] + ctx.author.name
+    progStartCmd = chatRef[1] + "-" + ctx.author.name
     send(chatbot, progStartCmd, ctx.author.name)
     response = listen(ctx.author.name, chatbot)
     resetDB(chatbot, ctx.author.name)
@@ -93,7 +93,7 @@ async def startchat(ctx):
     #PROGRESS
     needToTerminate = False
     while needToTerminate == False:
-        progressCmd = chatRef[2] + ctx.author.name + " " + msg.content
+        progressCmd = chatRef[2] + "-" + ctx.author.name + "-" + msg.content
         send(chatbot, progressCmd, ctx.author.name)
         await asyncio.sleep(2)
         responseToUser = listen(ctx.author.name, chatbot)

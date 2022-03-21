@@ -77,10 +77,16 @@ public class Progressor {
     }
 
     private String moviesHandler(String phrase){
-        String[] operatives = {"I", "liked", "loved", "watched", "watching", "love", "life", "my", "favorite", "movie", "is"};
+        String[] operatives = {"I", "liked", "loved", "watched", "watching", "love", "life", "my", "favorite", "movie", "is", "like", "watch"};
         String[] phraseArray = phrase.split("\\s");
         for(int i = 0; i < phraseArray.length; i++){
-            boolean isOperative = Arrays.asList(operatives).contains(phraseArray[i]);
+            boolean isOperative = false;
+            for(int j = 0; j < operatives.length; j++){
+                if(phraseArray[i].toLowerCase().equals(operatives[j].toLowerCase())){
+                    isOperative = true;
+                    break;
+                }
+            }
             if(!isOperative){
                 this.movies.add(phraseArray[i].substring(0, 1) + phraseArray[i].substring(1));
                 break;
