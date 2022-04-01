@@ -71,6 +71,14 @@ def RetrieveDataFromTarget(rpgData, targetIndex, target, requestedIndex):
         if row[targetIndex] == target:
             return row[requestedIndex]
 
+#Update Bot's status
+async def updateStatus(author):
+    status_update = discord.Activity(type=discord.ActivityType.listening, name=" music with " + author)
+    await client.change_presence(activity=status_update)
+
+#Clear Bot's status
+async def clearStatus(author):
+    await client.change_presence(status=discord.Status.idle, activity=None)
 
 #Music Bot COMMANDS - Used by users to control operations
 
@@ -88,7 +96,8 @@ async def playtube(ctx, query, loopChoice):
     
     vc = voice_state.channel
     voiceClient = await vc.connect()
-
+    await updateStatus(ctx.author.name)
+    
     if loopChoice == "loopOn":
         if not voiceClient.is_playing():
             urlInfo = play(voiceClient, FFMPEG_OPTIONS, YDL_OPTIONS, query)
@@ -111,6 +120,7 @@ async def pause(ctx):
     voiceClient = client.voice_clients[0]
     voiceClient.pause()
     await ctx.channel.send("Paused!")
+    await clearStatus(ctx.author.name)
 
 #Resume player
 @client.command()
@@ -118,6 +128,7 @@ async def resume(ctx):
     voiceClient = client.voice_clients[0]
     voiceClient.resume()
     await ctx.channel.send("Resumed!")
+    await updateStatus(ctx.author.name)
 
 #Stop player
 @client.command()
@@ -125,6 +136,7 @@ async def stop(ctx):
     voiceClient = client.voice_clients[0]
     voiceClient.stop()
     await ctx.channel.send("Stopped playing!")
+    await clearStatus(ctx.author.name)
 
 #Disconnect player
 @client.command()
@@ -132,6 +144,7 @@ async def dc(ctx):
     voiceClient = client.voice_clients[0]
     await voiceClient.disconnect()
     await ctx.channel.send("Disconnected!")
+    await clearStatus(ctx.author.name)
 
 #Add song to playlist
 @client.command()
@@ -142,6 +155,11 @@ async def add(ctx, song):
     writeDB("PLAYLIST", "SONGS", "USERNAME", currentSongs + "-" + processedSong, ctx.author.name)
     await ctx.channel.send("Added ***" + song + "*** to your playlist")
 
+#Delete song in playlist
+@client.command()
+async def delete(ctx, song):
+
+#Print playlist
 @client.command()
 async def playlist(ctx):
     embed = discord.Embed(
@@ -155,9 +173,14 @@ async def playlist(ctx):
             continue
         else:
             embed.add_field(name=song, value='\u200b', inline=False)
-    embed.add_field(name="Number of Songs: ", value=str(len(songList)), inline=False)
+    embed.add_field(name="Number of Songs: ", value=str(len(songList) - 1), inline=False)
     await ctx.channel.send(embed=embed)
 
+#Play one song in playlist
+@client.command()
+async def singleplay(ctx, song, loopMode):
+
+#Shuffle play through playlist
 @client.command()
 async def shuffleplay(ctx):
     playlistTable = retrieveTable("PLAYLIST")
@@ -170,7 +193,7 @@ async def shuffleplay(ctx):
 
     vc = ctx.author.voice.channel
     voiceClient = await vc.connect()
-    
+    await updateStatus(ctx.author.name)
     while True:
         songIndex = randint(0, len(songList) - 1)
         if songList[songIndex] == '':
@@ -181,7 +204,8 @@ async def shuffleplay(ctx):
         await asyncio.sleep(2)
         if voiceClient.is_paused():
             continue
-    
+
+#Play through playlist linearly    
 @client.command()
 async def listplay(ctx, loopMode):
     playlistTable = retrieveTable("PLAYLIST")
@@ -194,7 +218,7 @@ async def listplay(ctx, loopMode):
 
     vc = ctx.author.voice.channel
     voiceClient = await vc.connect()
-    
+    await updateStatus(ctx.author.name)
     if loopMode == "loopOn":
         while True:
             for song in songList:
