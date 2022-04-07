@@ -158,6 +158,7 @@ async def add(ctx, song):
 #Delete song in playlist
 @client.command()
 async def delete(ctx, song):
+    pass
 
 #Print playlist
 @client.command()
@@ -179,6 +180,7 @@ async def playlist(ctx):
 #Play one song in playlist
 @client.command()
 async def singleplay(ctx, song, loopMode):
+    pass
 
 #Shuffle play through playlist
 @client.command()
