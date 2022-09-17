@@ -2,6 +2,7 @@
 import os
 import discord
 import sqlite3
+import asyncio
 from discord.ext import commands
 from dotenv import load_dotenv
 from random import randint
@@ -20,6 +21,21 @@ client = commands.Bot(command_prefix="*", intents=intents)
 #Sqlite Connection Code
 dataConn = sqlite3.connect('C:\All Stuff\Programming\MyBot\SQLite Central DB\Central DB.db')
 cursor = dataConn.cursor()
+
+#Wordle constants
+word_list = ["FLOCK",
+             "LIVER",
+             "BALLS",
+             "TOKEN",
+             "SWIFT",
+             "SERVE",
+             "PASTE",
+             "MOODY",
+             "CLOUD",
+             "MUDDY"]
+yellow_emoji_id = "<:yellow_square:1002012573106978918>"
+black_emoji_id = "<:black_large_square:1002012761087283220>"
+green_emoji_id = "<:green_square:1002012957653352519>"
 
 #Status Indicator
 @client.event
@@ -82,6 +98,10 @@ def RetrieveDataFromTarget(rpgData, targetIndex, target, requestedIndex):
 
 #RPG USER COMMANDS: Used to run RPG operations by user
 
+@client.command()
+async def test(ctx):
+    await ctx.channel.send("<:smile:1002011646178377838>")
+    
 #Work, increase Money balance by random amount
 @client.command()
 async def work(ctx):
@@ -327,7 +347,82 @@ async def fight(ctx, name):
             break
         
         counter += 1
-            
+
+#Wordle - WIP
+@client.command()
+async def wordle(ctx):
+    correct_word = word_list[randint(0, len(word_list) - 1)]
+    print(correct_word)
+    word_char = list(correct_word)
+    total_attempts = 0
+    output_record = ""
+    
+    for i in range(6):
+        #Listen for valid word
+        await ctx.channel.send("Enter word:")
+        while True:
+            def check(m):
+                if m.channel == ctx.channel and m.author == ctx.author:
+                    return m
+            msg = await client.wait_for('message', check=check)
+            word_attempt = msg.content
+            word_attempt = word_attempt.upper()
+            attempt_char = list(word_attempt)
+            if len(attempt_char) != 5:
+                ctx.channel.send("Word is over 5 letters, please try again")
+            else:
+                break
+
+        #Prepare output record header
+        total_attempts = i + 1
+        output_record_header = "TOTAL ATTEMPTS: " + str(total_attempts) + "\n"
+
+        #Prepare attempt output header
+        attempt_output = "ATTEMPT " + str(i + 1) + ": " + word_attempt + "  "
+        
+        #Determine accuracy of attempted word, update attempt output
+        yellow_chars = [] #includes letters that were in the original word, but in the wrong position
+        black_chars = [] #includes letters that weren't in the original word
+        green_chars = [] #includes letters that were in the original word and the correct position
+        for i in range(len(word_char)):
+            print(i)
+            if attempt_char[i] != word_char[i]:
+                if attempt_char[i] in word_char:
+                    yellow_chars.append(attempt_char[i])
+                    attempt_output += yellow_emoji_id
+                else:
+                    black_chars.append(attempt_char[i])
+                    attempt_output += black_emoji_id
+            else:
+                green_chars.append(attempt_char[i])
+                attempt_output += green_emoji_id
+
+            #Process duplicates - WIP
+            if word_attempt.count(attempt_char[i]) != 1:
+                try:
+                    word_char[word_char.index(attempt_char[i])] = "SKIP"
+                except:
+                    continue
+                
+        #Update output record with new attempt output
+        output_record += attempt_output + "\n"
+
+        #Send attempt output and output record
+        await ctx.channel.send(attempt_output)
+        await asyncio.sleep(2)
+        await ctx.channel.send(output_record_header + output_record)
+
+        #If user guesses word correctly
+        if len(green_chars) == 5:
+            await ctx.channel.send("You guessed the correct word!")
+            break
+
+        #If user has run out of tries
+        if i == 5:
+            await ctx.channel.send("You have run out of tries! Correct word: " + correct_word)
+        
+                
+
             
         
     
@@ -370,7 +465,7 @@ async def init(ctx):
 #OVERALL: Help command for detailed documentation for all commands
 #Redirects to a webpage
 @client.command()
-async def help(ctx):
+async def helpme(ctx):
     helpPageUrl = ""
     await ctx.channel.send("Click on this link for help: " + helpPageUrl)
 client.run(TOKEN)

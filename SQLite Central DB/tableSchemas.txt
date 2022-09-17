@@ -43,6 +43,16 @@ Purpose: Provide communication between ChatBot SubService and MyBot Service
     - Column 2: USERNAME (TEXT)
     - Column 3: TICKET (TEXT)
     - Column 4: RESPONSE (TEXT)
+    - Column 5: SESSION_STATUS (TEXT)
+
+Name: CHATCTX
+Purpose: Store contextual information for all on-going chat sessions
+Schema:
+    - Column 1: USERNAME (TEXT) - PRIMARY KEY
+    - Column 2: NAME (TEXT)
+    - Column 3: MOOD (TEXT)
+    - Column 4: MOVIES (TEXT)
+    - Column 5: TOPICS (TEXT)
 
 Music:
 --------------
@@ -54,4 +64,4 @@ Purpose: Provide musicPlayer a way to store custom user playlists
 	- Column 4: SONGNUM (TEXT)
 	- Column 5: LISTNAME (TEXT)
 
-Total Tables: 6
+Total Tables: 7

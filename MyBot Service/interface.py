@@ -24,6 +24,7 @@ chatRef = ["CSTART ", "PROGSTART ", "PROGRESS ", "TERMINATE "]
 #DB Table Names
 chatbot = "CHATBOT"
 calc = "CALCULATOR"
+
 @client.event
 async def on_ready():
     for guild in client.guilds:
@@ -63,6 +64,19 @@ async def startchat(ctx):
     #Create DM with author
     dm = await ctx.author.create_dm()
 
+    #Check SESSION_STATUS
+    data = cursor.execute("SELECT * FROM CHATBOT;")
+    for row in data:
+        if row[1] == ctx.author.name:
+            if row[4] == 'False':
+                await ctx.channel.send("Chat session started!")
+                cursor.execute("UPDATE CHATBOT SET SESSION_STATUS = 'True' WHERE USERNAME = '{username}';".format(username=ctx.author.name))
+                dataConn.commit()
+                break
+            else:
+                await ctx.channel.send("You already have a chat session in progress with the ChatBot")
+                return
+            
     #CSTART
     startCmd = chatRef[0] + "-" + ctx.author.name
     send(chatbot, startCmd, ctx.author.name)
@@ -72,7 +86,8 @@ async def startchat(ctx):
 
     #Wait for user response - not used for PROGSTART
     def check(m):
-        return m.content == m.content
+        if m.channel == dm:
+            return m.content == m.content
 
     msg = await client.wait_for('message', check=check)
     
@@ -86,7 +101,7 @@ async def startchat(ctx):
     msg = None
     #Wait for user response - used for PROGRESS
     def check(m):
-        if m.author.name == ctx.author.name:
+        if m.author.name == ctx.author.name and m.channel == dm:
             return m.content == m.content
     msg = await client.wait_for('message', check=check)
     
@@ -97,24 +112,30 @@ async def startchat(ctx):
         send(chatbot, progressCmd, ctx.author.name)
         await asyncio.sleep(2)
         responseToUser = listen(ctx.author.name, chatbot)
-        await dm.send(responseToUser)
-        #Keep listening for progression 
-        while True:
-            progression = listen(ctx.author.name, chatbot)
-            #If progression has been sent
-            if progression != responseToUser:
-                #If progression is a termination
-                if chatRef[3] in progression:
-                    progression = progression.replace(chatRef[3], '')
-                    needToTerminate = True
-                await dm.send(progression)
-                break
-        
         resetDB(chatbot, ctx.author.name)
+        await dm.send(responseToUser)
+        
+        #Keep listening for progression 
+        progression = listen(ctx.author.name, chatbot)
+        print(progression)
+        
+        #If progression is a termination
+        if chatRef[3] in progression:
+            progression = progression.replace(chatRef[3], '')
+            needToTerminate = True
+        await dm.send(progression)
+        resetDB(chatbot, ctx.author.name)
+
+        #Immediately breaks out of the loop upon termination to allow session to end
+        if needToTerminate == True:
+            break
+
         #Wait for user response - used for PROGRESS
         def check(m):
-            if m.author.name == ctx.author.name:
+            if m.author.name == ctx.author.name and m.channel == dm:
                 return m.content == m.content
         msg = await client.wait_for('message', check=check)
         
+    cursor.execute("UPDATE CHATBOT SET SESSION_STATUS = 'False' WHERE USERNAME = '{username}';".format(username=ctx.author.name))
+    dataConn.commit()        
 client.run(TOKEN)

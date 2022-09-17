@@ -65,5 +65,9 @@ async def getpost(ctx, subreddit):
     await ctx.channel.send(post['data']['title'])
     await ctx.channel.send(post['data']['url'])
 
+@client.command()
+async def test(ctx):
+    print("Hello!")
+
     
 client.run(TOKEN)
