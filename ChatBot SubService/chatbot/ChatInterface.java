@@ -66,11 +66,23 @@ public class ChatInterface{
 
     // Initializes CHATCTX by adding new row to the table for current session's ctx data
     public void init_ctx(String username){
-        String command = "INSERT INTO CHATCTX (USERNAME, TOPICS) VALUES (?, ?)";
+        String command = "INSERT INTO CHATCTX (USERNAME, TOPICS) VALUES (?, ?);";
         try(Connection conn = this.connect();
             PreparedStatement PS = conn.prepareStatement(command)){
             PS.setString(1, username);
-            PS.setString(2, "NAME, MOOD, MOVIES");
+            PS.setString(2, "NAME,MOOD,MOVIES");
+            PS.executeUpdate();
+        } catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    //Resets CHATCTX after session is over
+    public void reset_ctx(String username){
+        String command = "DELETE FROM CHATCTX WHERE USERNAME = ?;";
+        try(Connection conn = this.connect();
+            PreparedStatement PS = conn.prepareStatement(command)){
+            PS.setString(1, username);
             PS.executeUpdate();
         } catch(SQLException e){
             System.out.println(e.getMessage());
@@ -79,13 +91,12 @@ public class ChatInterface{
 
     //Updates CHAT_CTX fields (column)
     public void update_ctx(String username, String field, String value){
-        String command = "UPDATE CHATCTX SET ? = ? WHERE USERNAME = ?";
-        System.out.println(command);
+        String command = "UPDATE CHATCTX SET " + field + " = ? WHERE USERNAME = ?;";
+        System.out.println("update_ctx: " + command);
         try(Connection conn = this.connect();
             PreparedStatement PS = conn.prepareStatement(command)){
-            PS.setString(1, field);
-            PS.setString(2, value);
-            PS.setString(3, username);
+            PS.setString(1, value);
+            PS.setString(2, username);
             PS.executeUpdate();
         } catch(SQLException e){
             System.out.println("UPDATE: " + e.getMessage());
@@ -95,7 +106,7 @@ public class ChatInterface{
     //Gets any field from CHATCTX
     public String get_ctx(String username, String field){
         String command = "SELECT " + field + " FROM CHATCTX WHERE USERNAME = " + "\"" + username + "\";";
-        System.out.println(command);
+        System.out.println("get_ctx: " + command);
         try(Connection conn = this.connect();
             Statement statement = conn.createStatement();
             ResultSet rs = statement.executeQuery(command)){

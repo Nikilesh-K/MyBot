@@ -3,7 +3,7 @@ package chatbot;
 import java.util.*;
 
 public class Progressor {
-    public enum Topic{
+    private enum Topic{
         NAME,
         MOVIES,
         MOOD
@@ -30,8 +30,6 @@ public class Progressor {
             "MOOD", Topic.MOOD,
             "MOVIES", Topic.MOVIES
     );
-
-    private Topic currentTopic;
 
     //TODO FOR HANDLERS: Add response variation
     private String nameHandler(String phrase, String username){
@@ -132,9 +130,19 @@ public class Progressor {
                 Arrays.asList(IF.get_ctx(username, "TOPICS").split("[,]", 0))
         );
 
-        //Start termination
+        System.out.println("progress: " + topics);
+        System.out.println("progress: " + topics.size());
+
+        /*
+        Start termination
+        NOTE: When the last element is removed from the topics list in Central DB, it leaves behind an empty string
+        which counts as an element in the list. We remove this empty string (if it exists) before checking if
+        termination is necessary.
+         */
+        topics.remove("");
         if(topics.size() == 0){
             String termination = terminator.terminate();
+            IF.reset_ctx(username);
             IF.update(username, "TERMINATE " + termination);
             return;
         }
@@ -142,7 +150,10 @@ public class Progressor {
         //Choose topic
         Random randObj = new Random();
         int topicIndex = randObj.nextInt(topics.size());
+        System.out.println("progress: " + topicIndex);
+        System.out.println("progress: " + topics.get(topicIndex));
         Topic chosenTopic = topicNameMapping.get(topics.get(topicIndex));
+        System.out.println("progress: " + chosenTopic);
         ArrayList<String> topicQuestions = this.topicQuestionMapping.get(chosenTopic);
 
         //Choose question for topic
@@ -152,29 +163,30 @@ public class Progressor {
         //Update interface
         IF.update(username, chosenQuestion);
 
-        //Set current topic so Progressor can remember
-        currentTopic = chosenTopic;
+        //Set current topic in Central DB
+        IF.update_ctx(username, "CURRENT_TOPIC", topics.get(topicIndex));
     }
 
     public void reply(ChatInterface IF, String userResponse, String username){
+        Topic currentTopic = topicNameMapping.get(IF.get_ctx(username, "CURRENT_TOPIC"));
         String response = process(currentTopic, userResponse, username);
         IF.update(username, response);
 
         //Long-winded way of updating topic list in Central DB
-        ArrayList<String> topics = new ArrayList<String>( //Get current list of topics
+        ArrayList<String> topics = new ArrayList<String>( //Get current list of topics as ArrayList
                 Arrays.asList(IF.get_ctx(username, "TOPICS").split("[,]", 0))
         );
 
-        for(String key : topicNameMapping.keySet()){ //Find corresponding topic name for currentTopic
-            if(topicNameMapping.get(key) == currentTopic){
-                topics.remove(key); //Update ArrayList, convert ArrayList into string, update CHATCTX
-                String topicList = "";
-                for(String topic : topics){
-                    topicList += topic;
-                }
-                IF.update_ctx(username, "TOPICS", topicList);
+        topics.remove(IF.get_ctx(username, "CURRENT_TOPIC")); //Update ArrayList
+        StringBuilder newTopicList = new StringBuilder(); //Convert updated ArrayList to string
+        for(int i = 0; i < topics.size(); i++){
+            newTopicList.append(topics.get(i));
+            if(i < topics.size() - 1){
+                newTopicList.append(",");
             }
         }
+
+        IF.update_ctx(username, "TOPICS", newTopicList.toString());
     }
 
 }
